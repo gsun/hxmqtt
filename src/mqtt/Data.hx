@@ -3,25 +3,14 @@ package mqtt;
 import haxe.io.BytesBuffer;
 
 typedef MqttPacket = {
-	var ptype:CtrlPacketType;
+	var pktType:CtrlPktType;
 	var qos:QoS;
 	var dup:Bool;
 	var retain:Bool;
 	@:optional var messageId:Int;
 	@:optional var length:Int;
 
-	@:optional var connect:Connect;
-	@:optional var publish:Publish;
-	@:optional var connack:Connack;
-	@:optional var subscribe:Subscribe;
-	@:optional var suback:Suback;
-	@:optional var unsubscribe:Unsubscribe;
-	@:optional var unsuback:Unsuback;
-	@:optional var puback:Puback;
-	@:optional var pubcomp:Pubcomp;
-	@:optional var pubrec:Pubrec;
-	@:optional var pubrel:Pubrel;
-	@:optional var disconnect:Disconnect;
+	@:optional var payload:Dynamic;
 }
 
 typedef WillProperties = {

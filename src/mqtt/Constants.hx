@@ -1,7 +1,7 @@
 package mqtt;
 
 @:enum
-abstract CtrlPacketType(Int) to Int {
+abstract CtrlPktType(Int) to Int {
 	var Reserved = 0;
 	var Connect = 1;
 	var Connack = 2;
@@ -40,7 +40,7 @@ abstract ProtocolName(String) to String {
 }
 
 @:enum
-abstract ProtocolProperty(Int) to Int = {
+abstract PropertyId(Int) to Int = {
 	var payloadFormatIndicator = 1;
 	var messageExpiryInterval = 2;
 	var contentType = 3;
@@ -71,7 +71,7 @@ abstract ProtocolProperty(Int) to Int = {
 }
 
 @:enum
-abstract ConnackReason(Int) to Int = {
+abstract ConnackReasonCode(Int) to Int = {
 	var Success = 0;
 	var UnspecifiedError = 128;
 	var MalformedPacket = 129;
@@ -97,7 +97,7 @@ abstract ConnackReason(Int) to Int = {
 }
 
 @:enum
-abstract PubackReason(Int) to Int = {
+abstract PubackReasonCode(Int) to Int = {
 	var Success = 0;
 	var NoMatchingSubscribers = 16;
 	var UnspecifiedError = 128;
@@ -110,7 +110,7 @@ abstract PubackReason(Int) to Int = {
 }
 
 @:enum
-abstract PubrecReason(Int) to Int = {
+abstract PubrecReasonCode(Int) to Int = {
 	var Success = 0;
 	var NoMatchingSubscribers = 16;
 	var UnspecifiedError = 128;
@@ -123,19 +123,19 @@ abstract PubrecReason(Int) to Int = {
 }
 
 @:enum
-abstract PubrelReason(Int) to Int = {
+abstract PubrelReasonCode(Int) to Int = {
 	var Success = 0;
 	var PacketIdentifierNotFound = 146;
 }
 
 @:enum
-abstract PubcompReason(Int) to Int = {
+abstract PubcompReasonCode(Int) to Int = {
 	var Success = 0;
 	var PacketIdentifierNotFound = 146;
 }
 
 @:enum
-abstract UnsubackReason(Int) to Int = {
+abstract UnsubackReasonCode(Int) to Int = {
 	var Success = 0;
 	var NoSubscriptionExisted = 17;
 	var UnspecifiedError = 128;
@@ -146,7 +146,7 @@ abstract UnsubackReason(Int) to Int = {
 }
 
 @:enum
-abstract AuthReason(Int) to Int = {
+abstract AuthReasonCode(Int) to Int = {
 	var Success = 0;
 	var ContinueAuthentication = 24;
 	var Reauthenticate = 25;
@@ -155,7 +155,7 @@ abstract AuthReason(Int) to Int = {
 }
 
 @:enum
-abstract DisconnectReason(Int) to Int = {
+abstract DisconnectReasonCode(Int) to Int = {
 	var NormalDisconnection = 0;
 	var DisconnectWithWill = 4;
 	var UnspecifiedError = 128;
@@ -189,9 +189,10 @@ abstract DisconnectReason(Int) to Int = {
 }
 
 @:enum
-abstract SubackReason(Int) to Int = {
+abstract SubackReasonCode(Int) to Int = {
 	var GrantedQoS0 = 0;
-	var GrantedQoS1 = 1 var GrantedQoS2 = 2;
+	var GrantedQoS1 = 1;
+	var GrantedQoS2 = 2;
 	var UnspecifiedError = 128;
 	var ImplementationSpecificError = 131;
 	var NotAuthorized = 135;
@@ -204,7 +205,7 @@ abstract SubackReason(Int) to Int = {
 }
 
 @:enum
-abstract PublishProperty(Int) to Int = {
+abstract PublishPropertyId(Int) to Int = {
 	var PayloadFormatIndicator = 1;
 	var MessageExpiryInterval = 2;
 	var ContentType = 3;
@@ -216,7 +217,7 @@ abstract PublishProperty(Int) to Int = {
 }
 
 @:enum
-abstract ConnectProperty(Int) to Int = {
+abstract ConnectPropertyId(Int) to Int = {
 	var SessionExpiryInterval = 17;
 	var AuthenticationMethod = 21;
 	var AuthenticationData = 22;
@@ -229,7 +230,7 @@ abstract ConnectProperty(Int) to Int = {
 }
 
 @:enum
-abstract ConnackProperty(Int) to Int = {
+abstract ConnackPropertyId(Int) to Int = {
 	var SessionExpiryInterval = 17;
 	var AssignedClientIdentifier = 18;
 	var ServerKeepAlive = 19;
@@ -250,13 +251,13 @@ abstract ConnackProperty(Int) to Int = {
 }
 
 @:enum
-abstract SubscribeProperty(Int) to Int = {
+abstract SubscribePropertyId(Int) to Int = {
 	var SubscriptionIdentifier = 11;
 	var UserProperty = 38;
 }
 
 @:enum
-abstract DisconnectProperty(Int) to Int = {
+abstract DisconnectPropertyId(Int) to Int = {
 	var AuthenticationMethod = 21;
 	var AuthenticationData = 22;
 	var ReasonString = 31;
@@ -264,7 +265,7 @@ abstract DisconnectProperty(Int) to Int = {
 }
 
 @:enum
-abstract WillProperty(Int) to Int = {
+abstract WillPropertyId(Int) to Int = {
 	var PayloadFormatIndicator = 1;
 	var MessageExpiryInterval = 2;
 	var ContentType = 3;
@@ -275,7 +276,7 @@ abstract WillProperty(Int) to Int = {
 }
 
 @:enum
-abstract AuthProperty(Int) to Int = {
+abstract AuthPropertyId(Int) to Int = {
 	var SessionExpiryInterval = 17;
 	var ServerReference = 28;
 	var ReasonString = 31;
@@ -283,42 +284,42 @@ abstract AuthProperty(Int) to Int = {
 }
 
 @:enum
-abstract PubackProperty(Int) to Int = {
+abstract PubackPropertyId(Int) to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
 
 @:enum
-abstract PubrecProperty(Int) to Int = {
+abstract PubrecPropertyId(Int) to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
 
 @:enum
-abstract PubrelProperty(Int) to Int = {
+abstract PubrelPropertyId(Int) to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
 
 @:enum
-abstract PubcompProperty(Int) to Int = {
+abstract PubcompPropertyId(Int) to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
 
 @:enum
-abstract SubackProperty(Int) to Int = {
+abstract SubackPropertyId(Int) to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
 
 @:enum
-abstract UnsubscribeProperty(Int) to Int = {
+abstract UnsubscribePropertyId(Int) to Int = {
 	var UserProperty = 38;
 }
 
 @:enum
-abstract UnsubackProperty(Int) to Int = {
+abstract UnsubackPropertyId(Int) to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
