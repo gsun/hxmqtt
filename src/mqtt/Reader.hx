@@ -2,79 +2,99 @@ package mqtt;
 
 class Reader {
 	var i:haxe.io.Input;
+	var bits:format.tools.BitsInput;
 
 	public function new(i) {
 		this.i = i;
 		this.i.bigEndian = true;
+		bits = new format.tools.BitsInput(i);
 	}
 
-	function readPktType():CtrlPktType {
-		return Reserved;
+	function readString() {
+		var size = i.readUInt16();
+		return i.readString(size, UTF8);
 	}
 
-	function readPayload(t:CtrlPktType):Dynamic {
+	function readBody(t:CtrlPktType):Dynamic {
 		return switch (t) {
 			case Connect:
-				readConnect();
+				readConnectBody();
 			case Connack:
-				readConnack();
+				readConnackBody();
 			case Publish:
-				readPublish();
+				readPublishBody();
 			case Puback:
-				readPuback();
+				readPubackBody();
 			case Pubrec:
-				readPubrec();
+				readPubrecBody();
 			case Pubrel:
-				readPubrel();
+				readPubrelBody();
 			case Pubcomp:
-				readPubcomp();
+				readPubcompBody();
 			case Subscribe:
-				readSubscribe();
+				readSubscribeBody();
 			case Suback:
-				readSuback();
+				readSubackBody();
 			case Unsubscribe:
-				readUnsubscribe();
+				readUnsubscribeBody();
 			case Unsuback:
-				readUnsuback();
+				readUnsubackBody();
 			case Disconnect:
-				readDisconnect();
+				readDisconnectBody();
 			case Auth:
-				readAuth();
+				readAuthBody();
 		}
 	}
 
-	function readConnect():Connect {}
+	function readConnectBody():Connect {
+		var protocolName = readString();
+		var protocolVersion = i.readByte();
+		var userNameFlag = Bits.readBit();
+		var passwordFlag = Bits.readBit();
+		var willRetainFlag = Bits.readBit();
+		var willQos = Bits.readBits(2);
+		var willFlag = Bits.readBit();
+		var cleanStart = Bits.readBit();
+		var reserved = Bits.readBit();
+		var keepAlive = i.readUInt16();
+	}
 
-	function readConnack():Connack {}
+	function readConnackBody():Connack {}
 
-	function readPublish():Publish {}
+	function readPublishBody():Publish {}
 
-	function readPuback():Puback {}
+	function readPubackBody():Puback {}
 
-	function readPubrec():Pubrec {}
+	function readPubrecBody():Pubrec {}
 
-	function readPubrel():Pubrel {}
+	function readPubrelBody():Pubrel {}
 
-	function readPubcomp():Pubcomp {}
+	function readPubcompBody():Pubcomp {}
 
-	function readSubscribe():Subscribe {}
+	function readSubscribeBody():Subscribe {}
 
-	function readSuback():Suback {}
+	function readSubackBody():Suback {}
 
-	function readUnsubscribe():Unsubscribe {}
+	function readUnsubscribeBody():Unsubscribe {}
 
-	function readUnsuback():Unsuback {}
+	function readUnsubackBody():Unsuback {}
 
-	function readDisconnect():Disconnect {}
+	function readDisconnectBody():Disconnect {}
 
-	function readAuth():Auth {}
+	function readAuthBody():Auth {}
 
 	public function read():MqttPacket {
-		var pktType = readPktType();
-		var payload = readPayload(pktType);
+		var pktType:CtrlPktType = bits.readBits(4);
+		var dup:Bool = bits.readBit();
+		var qos:Qos = bits.readBits(2);
+		var retain:Bool = bits.readBit();
+		var body = readBody(pktType);
 		return {
 			pktType: pktType,
-			payload: payload
+			dup: dup,
+			qos: qos,
+			retain: retain,
+			body: body
 		};
 	}
 }

@@ -7,10 +7,8 @@ typedef MqttPacket = {
 	var qos:QoS;
 	var dup:Bool;
 	var retain:Bool;
-	@:optional var messageId:Int;
-	@:optional var length:Int;
 
-	@:optional var payload:Dynamic;
+	@:optional var body:Dynamic;
 }
 
 typedef WillProperties = {
@@ -43,11 +41,11 @@ typedef ConnectProperties = {
 	@:optional var authenticationData:BytesBuffer;
 }
 
-typedef Connect = {
+typedef ConnectBody = {
 	var clientId:String;
 	@:optional var protocolVersion:ProtocolVersion;
 	@:optional var protocolName:ProtocolName;
-	@:optional var clean:Bool;
+	@:optional var cleanStart:Bool;
 	@:optional var keepalive:Int;
 	@:optional var username:String;
 	@:optional var password:BytesBuffer;
@@ -66,7 +64,7 @@ typedef PublishProperties = {
 	@:optional var contentType:String;
 }
 
-typedef Publish = {
+typedef PublishBody = {
 	var topic:String;
 	var payload:BytesBuffer;
 	@:optional var properties:PublishProperties;
@@ -92,13 +90,13 @@ typedef ConnackProperties = {
 	@:optional var authenticationData:BytesBuffer;
 }
 
-typedef Connack = {
+typedef ConnackBody = {
 	var returnCode:Int;
 	var sessionPresent:Bool;
 	@:optional var properties:ConnackProperties;
 }
 
-typedef Subscription = {
+typedef SubscriptionBody = {
 	var topic:String var qos:QoS;
 	@:optional var nl:Bool;
 	@:optional var rap:Bool;
@@ -110,7 +108,7 @@ typedef SubscribeProperties = {
 	@:optional var userProperties:Dynamic;
 }
 
-typedef Subscribe = {
+typedef SubscribeBody = {
 	var subscriptions:Array<Subscription>;
 	@:optional var properties:SubscribeProperties;
 }
@@ -124,38 +122,38 @@ typedef Suback = {
 
 typedef UnsubscribeProperties = SubscribeProperties;
 
-typedef Unsubscribe = {
+typedef UnsubscribeBody = {
 	@:optional var properties:UnsubscribeProperties;
 	@:optional var unsubscriptions:Array<String>
 }
 
 typedef UnsubackProperties = SubscribeProperties;
 
-typedef Unsuback = {
+typedef UnsubackBody = {
 	@:optional var properties:UnsubackProperties;
 }
 
 typedef PubackProperties = SubscribeProperties;
 
-typedef Puback = {
+typedef PubackBody = {
 	@:optional var properties:PubackProperties;
 }
 
 typedef PubcompProperties = SubscribeProperties;
 
-typedef Pubcomp = {
+typedef PubcompBody = {
 	@:optional var properties:PubcompProperties
 }
 
 typedef PubrelProperties = SubscribeProperties;
 
-typedef Pubrel = {
+typedef PubrelBody = {
 	@:optional var properties:PubrelProperties;
 }
 
 typedef PubrecProperties = SubscribeProperties;
 
-typedef Pubrec = {
+typedef PubrecBody = {
 	@:optional var properties:PubrecProperties
 }
 
@@ -166,6 +164,6 @@ typedef DisconnectProperties = {
 	@:optional var serverReference:String;
 }
 
-typedef Disconnect = {
+typedef DisconnectBody = {
 	@:optional var properties:DisconnectProperties;
 }

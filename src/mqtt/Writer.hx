@@ -11,66 +11,66 @@ class Writer {
 
 	function writeHeader() {}
 
-	function writePayload() {
+	function writeBody() {
 		switch (p.pktType) {
 			case Connect:
-				writeConnect();
+				writeConnectBody();
 			case Connack:
-				writeConnack();
+				writeConnackBody();
 			case Publish:
-				writePublish();
+				writePublishBody();
 			case Puback:
-				writePuback();
+				writePubackBody();
 			case Pubrec:
-				writePubrec();
+				writePubrecBody();
 			case Pubrel:
-				writePubrel();
+				writePubrelBody();
 			case Pubcomp:
-				writePubcomp();
+				writePubcompBody();
 			case Subscribe:
-				writeSubscribe();
+				writeSubscribeBody();
 			case Suback:
-				writeSuback();
+				writeSubackBody();
 			case Unsubscribe:
-				writeUnsubscribe();
+				writeUnsubscribeBody();
 			case Unsuback:
-				writeUnsuback();
+				writeUnsubackBody();
 			case Disconnect:
-				writeDisconnect();
+				writeDisconnectBody();
 			case Auth:
-				writeAuth();
+				writeAuthBody();
 		}
 	}
 
-	function writeConnect() {}
+	function writeConnectBody() {}
 
-	function writeConnack() {}
+	function writeConnackBody() {}
 
-	function writePublish() {}
+	function writePublishBody() {}
 
-	function writePuback() {}
+	function writePubackBody() {}
 
-	function writePubrec() {}
+	function writePubrecBody() {}
 
-	function writePubrel() {}
+	function writePubrelBody() {}
 
-	function writePubcomp() {}
+	function writePubcompBody() {}
 
-	function writeSubscribe() {}
+	function writeSubscribeBody() {}
 
-	function writeSuback() {}
+	function writeSubackBody() {}
 
-	function writeUnsubscribe() {}
+	function writeUnsubscribeBody() {}
 
-	function writeUnsuback() {}
+	function writeUnsubackBody() {}
 
-	function writeDisconnect() {}
+	function writeDisconnectBody() {}
 
-	function writeAuth() {}
+	function writeAuthBody() {}
 
 	public function write(p:MqttPacket) {
 		this.p = p;
 		writeHeader();
-		writePayload();
+		writeBody();
 	}
 }
