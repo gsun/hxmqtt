@@ -84,10 +84,16 @@ class Reader {
 	function readAuthBody():Auth {}
 
 	public function read():MqttPacket {
-		var pktType:CtrlPktType = bits.readBits(4);
-		var dup:Bool = bits.readBit();
-		var qos:Qos = bits.readBits(2);
-		var retain:Bool = bits.readBit();
+		var pktType = bits.readBits(4);
+		var dup = bits.readBit();
+		var qos = bits.readBits(2);
+		var retain = bits.readBit();
+		if (pktType <= CtrlPktType.Reserved || pktType > CtrlPktType.Auth) {
+			throw new MalformedPacketException('invalid packet type ${pktType}');
+		}
+		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce) {
+			throw new MalformedPacketException('invalid Qos ${qos}');
+		}
 		var body = readBody(pktType);
 		return {
 			pktType: pktType,

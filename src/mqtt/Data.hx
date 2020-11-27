@@ -167,3 +167,5 @@ typedef DisconnectProperties = {
 typedef DisconnectBody = {
 	@:optional var properties:DisconnectProperties;
 }
+
+class MalformedPacketException extends haxe.Exception {}
