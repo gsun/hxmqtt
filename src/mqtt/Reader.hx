@@ -15,6 +15,24 @@ class Reader {
 		return i.readString(size, UTF8);
 	}
 
+	function readBinary() {
+		var size = i.readUInt16();
+		return i.read(size);
+	}
+
+	function readVariableByteInteger() {
+		var value = 0;
+		var multiplier = 1;
+		do {
+			var byte = i.readByte();
+			value += ((byte & 127) * multiplier);
+			if (multiplier > 2097152)
+				throw new MalformedPacketException('Invalid variable Byte Integer.');
+			multiplier *= 128;
+		} while ((byte & 128) != 0);
+		return value;
+	}
+
 	function readBody(t:CtrlPktType):Dynamic {
 		return switch (t) {
 			case Connect:
@@ -46,7 +64,15 @@ class Reader {
 		}
 	}
 
-	function readConnectBody():Connect {
+	function readConnectProperties():ConnectProperties {
+		return {};
+	}
+
+	function readWillProperties():WillProperties {
+		return {};
+	}
+
+	function readConnectBody():ConnectBody {
 		var protocolName = readString();
 		var protocolVersion = i.readByte();
 		var userNameFlag = Bits.readBit();
@@ -57,43 +83,134 @@ class Reader {
 		var cleanStart = Bits.readBit();
 		var reserved = Bits.readBit();
 		var keepAlive = i.readUInt16();
+		if (protocolName != ProtocolName.Mqtt)
+			throw new MalformedPacketException('Invalid MQTT name ${protocolName}.');
+		if (protocolVersion != ProtocolVersion.V5)
+			throw new MalformedPacketException('Invalid MQTT version ${protocolVersion}.');
+		var connectPorperties = readConnackProperties();
+		var clientId = readString();
+		var willProperties = (willFlag) ? readWillProperties() : null;
+		var willTopic = (willFlag) ? readString() : null;
+		var willPayload = (willFlag) ? readBinary() : null;
+		var userName = (userNameFlag) ? readString() : null;
+		var password = (passwordFlag) ? readBinary() : null;
+		var will = {
+			topic: willTopic,
+			payload: willPayload;
+			qos: willQos,
+			retain: willRetainFlag,
+			properties: willProperties
+		};
+		return {
+			clientId: clientId,
+			protocolVersion: protocolVersion,
+			protocolName: protocolName,
+			cleanStart: cleanStart,
+			keepalive: keepAlive,
+			username: userName,
+			password: password,
+			will: will,
+			properties: connectPorperties
+		};
 	}
 
-	function readConnackBody():Connack {}
+	function readConnackProperties():ConnackProperties {
+		return {};
+	}
 
-	function readPublishBody():Publish {}
+	function readConnackBody():ConnackBody {
+		return {};
+	}
 
-	function readPubackBody():Puback {}
+	function readPublishBody():PublishBody {
+		return {};
+	}
 
-	function readPubrecBody():Pubrec {}
+	function readPubackProperties():PubackProperties {
+		return {};
+	}
 
-	function readPubrelBody():Pubrel {}
+	function readPubackBody():PubackBody {
+		return {};
+	}
 
-	function readPubcompBody():Pubcomp {}
+	function readPubrecProperties():PubrecProperties {
+		return {};
+	}
 
-	function readSubscribeBody():Subscribe {}
+	function readPubrecBody():PubrecBody {
+		return {};
+	}
 
-	function readSubackBody():Suback {}
+	function readPubrelProperties():PubrelProperties {
+		return {};
+	}
 
-	function readUnsubscribeBody():Unsubscribe {}
+	function readPubrelBody():PubrelBody {
+		return {};
+	}
 
-	function readUnsubackBody():Unsuback {}
+	function readPubcompProperties():PubcompProperties {
+		return {};
+	}
 
-	function readDisconnectBody():Disconnect {}
+	function readPubcompBody():PubcompBody {
+		return {};
+	}
 
-	function readAuthBody():Auth {}
+	function readSubscribeProperties():SubscribeProperties {
+		return {};
+	}
+
+	function readSubscribeBody():SubscribeBody {
+		return {};
+	}
+
+	function readSubackProperties():SubackProperties {
+		return {};
+	}
+
+	function readSubackBody():SubackBody {
+		return {};
+	}
+
+	function readUnsubscribeProperties():UnsubscribeProperties {
+		return {};
+	}
+
+	function readUnsubscribeBody():UnsubscribeBody {
+		return {};
+	}
+
+	function readUnsubackProperties():UnsubackProperties {
+		return {};
+	}
+
+	function readUnsubackBody():UnsubackBody {
+		return {};
+	}
+
+	function readDisconnectProperties():DisconnectProperties {
+		return {};
+	}
+
+	function readDisconnectBody():DisconnectBody {
+		return {};
+	}
+
+	function readAuthBody():AuthBody {
+		return {};
+	}
 
 	public function read():MqttPacket {
 		var pktType = bits.readBits(4);
 		var dup = bits.readBit();
 		var qos = bits.readBits(2);
 		var retain = bits.readBit();
-		if (pktType <= CtrlPktType.Reserved || pktType > CtrlPktType.Auth) {
+		if (pktType <= CtrlPktType.Reserved || pktType > CtrlPktType.Auth)
 			throw new MalformedPacketException('invalid packet type ${pktType}');
-		}
-		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce) {
+		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce)
 			throw new MalformedPacketException('invalid Qos ${qos}');
-		}
 		var body = readBody(pktType);
 		return {
 			pktType: pktType,
