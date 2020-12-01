@@ -10,17 +10,17 @@ class Reader {
 		bits = new format.tools.BitsInput(i);
 	}
 
-	function readString() {
+	function readString(i:haxe.io.Input) {
 		var size = i.readUInt16();
 		return i.readString(size, UTF8);
 	}
 
-	function readBinary() {
+	function readBinary(i:haxe.io.Input) {
 		var size = i.readUInt16();
 		return i.read(size);
 	}
 
-	function readVariableByteInteger() {
+	function readVariableByteInteger(i:haxe.io.Input) {
 		var value = 0;
 		var multiplier = 1;
 		do {
@@ -65,15 +65,67 @@ class Reader {
 	}
 
 	function readConnectProperties():ConnectProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var connectPorperties = {};
+		while (buffer.pos < length) {
+			var propertyId:ConnectPropertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case SessionExpiryInterval:
+					Reflect.setField(connectPorperties, "sessionExpiryInterval", buffer.readUInt32());
+				case AuthenticationMethod:
+					Reflect.setField(connectPorperties, "authenticationMethod", readString(buffer));
+				case AuthenticationData:
+					Reflect.setField(connectPorperties, "authenticationData", readBinary(buffer));
+				case RequestProblemInformation:
+					Reflect.setField(connectPorperties, "requestProblemInformation", buffer.readByte());
+				case RequestResponseInformation:
+					Reflect.setField(connectPorperties, "requestResponseInformation", buffer.readByte());
+				case ReceiveMaximum:
+					Reflect.setField(connectPorperties, "receiveMaximum", uffer.readUInt16());
+				case TopicAliasMaximum:
+					Reflect.setField(connectPorperties, "topicAliasMaximum", uffer.readUInt16());
+				case UserProperty:
+					Reflect.setField(connectPorperties, "userProperty", readString(buffer));
+				case MaximumPacketSize:
+					Reflect.setField(connectPorperties, "maximumPacketSize", buffer.readUInt32());
+				default:
+					throw new MalformedPacketException('Invalid connect property id ${propertyId}.');
+			}
+		}
+		return connectPorperties;
 	}
 
 	function readWillProperties():WillProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var willPorperties = {};
+		while (buffer.pos < length) {
+			var propertyId:WillPropertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case PayloadFormatIndicator:
+					Reflect.setField(connectPorperties, "payloadFormatIndicator", buffer.readByte());
+				case MessageExpiryInterval:
+					Reflect.setField(connectPorperties, "messageExpiryInterval", buffer.readUInt32());
+				case ContentType:
+					Reflect.setField(connectPorperties, "contentType", readString(buffer));
+				case ResponseTopic:
+					Reflect.setField(connectPorperties, "responseTopic", readString(buffer));
+				case CorrelationData:
+					Reflect.setField(connectPorperties, "correlationData", readBinary(buffer));
+				case WillDelayInterval:
+					Reflect.setField(connectPorperties, "willDelayInterval", buffer.readUInt32());
+				case UserProperty:
+					Reflect.setField(connectPorperties, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid will property id ${propertyId}.');
+			}
+		}
+		return willPorperties;
 	}
 
 	function readConnectBody():ConnectBody {
-		var protocolName = readString();
+		var protocolName = readString(i);
 		var protocolVersion = i.readByte();
 		var userNameFlag = Bits.readBit();
 		var passwordFlag = Bits.readBit();
@@ -88,12 +140,12 @@ class Reader {
 		if (protocolVersion != ProtocolVersion.V5)
 			throw new MalformedPacketException('Invalid MQTT version ${protocolVersion}.');
 		var connectPorperties = readConnackProperties();
-		var clientId = readString();
+		var clientId = readString(i);
 		var willProperties = (willFlag) ? readWillProperties() : null;
-		var willTopic = (willFlag) ? readString() : null;
-		var willPayload = (willFlag) ? readBinary() : null;
-		var userName = (userNameFlag) ? readString() : null;
-		var password = (passwordFlag) ? readBinary() : null;
+		var willTopic = (willFlag) ? readString(i) : null;
+		var willPayload = (willFlag) ? readBinary(i) : null;
+		var userName = (userNameFlag) ? readString(i) : null;
+		var password = (passwordFlag) ? readBinary(i) : null;
 		var will = {
 			topic: willTopic,
 			payload: willPayload;
