@@ -1,6 +1,6 @@
 package mqtt;
 
-import haxe.io.BytesBuffer;
+import haxe.io.Bytes;
 
 typedef MqttPacket = {
 	var pktType:CtrlPktType;
@@ -17,13 +17,13 @@ typedef WillProperties = {
 	@:optional var messageExpiryInterval:Int;
 	@:optional var contentType:String;
 	@:optional var responseTopic:String;
-	@:optional var correlationData:BytesBuffer;
+	@:optional var correlationData:Bytes;
 	@:optional var userProperties:Dynamic;
 }
 
 typedef Will = {
 	var topic:String;
-	var payload:BytesBuffer;
+	var payload:Bytes;
 	@:optional var qos:QoS;
 	@:optional var retain:Bool;
 	@:optional var properties:WillProperties;
@@ -38,7 +38,7 @@ typedef ConnectProperties = {
 	@:optional var requestProblemInformation:Bool;
 	@:optional var userProperties:Dynamic;
 	@:optional var authenticationMethod:String;
-	@:optional var authenticationData:BytesBuffer;
+	@:optional var authenticationData:Bytes;
 }
 
 typedef ConnectBody = {
@@ -48,7 +48,7 @@ typedef ConnectBody = {
 	@:optional var cleanStart:Bool;
 	@:optional var keepalive:Int;
 	@:optional var username:String;
-	@:optional var password:BytesBuffer;
+	@:optional var password:Bytes;
 	@:optional var will:Will;
 	@:optional var properties:ConnectProperties;
 }
@@ -58,7 +58,7 @@ typedef PublishProperties = {
 	@:optional var messageExpiryInterval:Int;
 	@:optional var topicAlias:Int;
 	@:optional var responseTopic:String;
-	@:optional var correlationData:BytesBuffer;
+	@:optional var correlationData:Bytes;
 	@:optional var userProperties:Dynamic;
 	@:optional var subscriptionIdentifier:Int;
 	@:optional var contentType:String;
@@ -66,7 +66,8 @@ typedef PublishProperties = {
 
 typedef PublishBody = {
 	var topic:String;
-	var payload:BytesBuffer;
+	@:optional var packetIdentifier:Int;
+	var payload:Bytes;
 	@:optional var properties:PublishProperties;
 }
 
@@ -87,11 +88,11 @@ typedef ConnackProperties = {
 	@:optional var responseInformation:String;
 	@:optional var serverReference:String;
 	@:optional var authenticationMethod:String;
-	@:optional var authenticationData:BytesBuffer;
+	@:optional var authenticationData:Bytes;
 }
 
 typedef ConnackBody = {
-	var returnCode:Int;
+	var reasonCode:ConnackReasonCode;
 	var sessionPresent:Bool;
 	@:optional var properties:ConnackProperties;
 }
@@ -104,7 +105,7 @@ typedef SubscriptionBody = {
 }
 
 typedef SubscribeProperties = {
-	@:optional var reasonString:String;
+	@:optional var subscriptionIdentifier:Int;
 	@:optional var userProperties:Dynamic;
 }
 
@@ -136,6 +137,8 @@ typedef UnsubackBody = {
 typedef PubackProperties = SubscribeProperties;
 
 typedef PubackBody = {
+	var packetIdentifier:
+	var reasonCode:PubackReasonCode;
 	@:optional var properties:PubackProperties;
 }
 

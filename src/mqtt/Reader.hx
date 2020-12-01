@@ -33,95 +33,64 @@ class Reader {
 		return value;
 	}
 
-	function readBody(t:CtrlPktType):Dynamic {
-		return switch (t) {
-			case Connect:
-				readConnectBody();
-			case Connack:
-				readConnackBody();
-			case Publish:
-				readPublishBody();
-			case Puback:
-				readPubackBody();
-			case Pubrec:
-				readPubrecBody();
-			case Pubrel:
-				readPubrelBody();
-			case Pubcomp:
-				readPubcompBody();
-			case Subscribe:
-				readSubscribeBody();
-			case Suback:
-				readSubackBody();
-			case Unsubscribe:
-				readUnsubscribeBody();
-			case Unsuback:
-				readUnsubackBody();
-			case Disconnect:
-				readDisconnectBody();
-			case Auth:
-				readAuthBody();
-		}
-	}
-
 	function readConnectProperties():ConnectProperties {
 		var length = readVariableByteInteger(i);
 		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var connectPorperties:ConnackProperties = {};
+		var p = {};
 		while (buffer.pos < length) {
-			var propertyId:ConnectPropertyId = readVariableByteInteger(buffer);
+			var propertyId = readVariableByteInteger(buffer);
 			switch (propertyId) {
-				case SessionExpiryInterval:
-					Reflect.setField(connectPorperties, "sessionExpiryInterval", buffer.readUInt32());
-				case AuthenticationMethod:
-					Reflect.setField(connectPorperties, "authenticationMethod", readString(buffer));
-				case AuthenticationData:
-					Reflect.setField(connectPorperties, "authenticationData", readBinary(buffer));
-				case RequestProblemInformation:
-					Reflect.setField(connectPorperties, "requestProblemInformation", buffer.readByte());
-				case RequestResponseInformation:
-					Reflect.setField(connectPorperties, "requestResponseInformation", buffer.readByte());
-				case ReceiveMaximum:
-					Reflect.setField(connectPorperties, "receiveMaximum", buffer.readUInt16());
-				case TopicAliasMaximum:
-					Reflect.setField(connectPorperties, "topicAliasMaximum", buffer.readUInt16());
-				case UserProperty:
-					Reflect.setField(connectPorperties, "userProperty", readString(buffer));
-				case MaximumPacketSize:
-					Reflect.setField(connectPorperties, "maximumPacketSize", buffer.readUInt32());
+				case ConnectPropertyId.SessionExpiryInterval:
+					Reflect.setField(p, "sessionExpiryInterval", buffer.readUInt32());
+				case ConnectPropertyId.AuthenticationMethod:
+					Reflect.setField(p, "authenticationMethod", readString(buffer));
+				case ConnectPropertyId.AuthenticationData:
+					Reflect.setField(p, "authenticationData", readBinary(buffer));
+				case ConnectPropertyId.RequestProblemInformation:
+					Reflect.setField(p, "requestProblemInformation", buffer.readByte());
+				case ConnectPropertyId.RequestResponseInformation:
+					Reflect.setField(p, "requestResponseInformation", buffer.readByte());
+				case ConnectPropertyId.ReceiveMaximum:
+					Reflect.setField(p, "receiveMaximum", buffer.readUInt16());
+				case ConnectPropertyId.TopicAliasMaximum:
+					Reflect.setField(p, "topicAliasMaximum", buffer.readUInt16());
+				case ConnectPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				case ConnectPropertyId.MaximumPacketSize:
+					Reflect.setField(p, "maximumPacketSize", buffer.readUInt32());
 				default:
 					throw new MalformedPacketException('Invalid connect property id ${propertyId}.');
 			}
 		}
-		return connectPorperties;
+		return p;
 	}
 
 	function readWillProperties():WillProperties {
 		var length = readVariableByteInteger(i);
 		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var willPorperties:willPorperties = {};
+		var p = {};
 		while (buffer.pos < length) {
-			var propertyId:WillPropertyId = readVariableByteInteger(buffer);
+			var propertyId = readVariableByteInteger(buffer);
 			switch (propertyId) {
-				case PayloadFormatIndicator:
-					Reflect.setField(willPorperties, "payloadFormatIndicator", buffer.readByte());
-				case MessageExpiryInterval:
-					Reflect.setField(willPorperties, "messageExpiryInterval", buffer.readUInt32());
-				case ContentType:
-					Reflect.setField(willPorperties, "contentType", readString(buffer));
-				case ResponseTopic:
-					Reflect.setField(willPorperties, "responseTopic", readString(buffer));
-				case CorrelationData:
-					Reflect.setField(willPorperties, "correlationData", readBinary(buffer));
-				case WillDelayInterval:
-					Reflect.setField(willPorperties, "willDelayInterval", buffer.readUInt32());
-				case UserProperty:
-					Reflect.setField(willPorperties, "userProperty", readString(buffer));
+				case WillPropertyId.PayloadFormatIndicator:
+					Reflect.setField(p, "payloadFormatIndicator", buffer.readByte());
+				case WillPropertyId.MessageExpiryInterval:
+					Reflect.setField(p, "messageExpiryInterval", buffer.readUInt32());
+				case WillPropertyId.ContentType:
+					Reflect.setField(p, "contentType", readString(buffer));
+				case WillPropertyId.ResponseTopic:
+					Reflect.setField(p, "responseTopic", readString(buffer));
+				case WillPropertyId.CorrelationData:
+					Reflect.setField(p, "correlationData", readBinary(buffer));
+				case WillPropertyId.WillDelayInterval:
+					Reflect.setField(p, "willDelayInterval", buffer.readUInt32());
+				case WillPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
 				default:
 					throw new MalformedPacketException('Invalid will property id ${propertyId}.');
 			}
 		}
-		return willPorperties;
+		return p;
 	}
 
 	function readConnectBody():ConnectBody {
@@ -169,69 +138,156 @@ class Reader {
 	function readConnackProperties():ConnackProperties {
 		var length = readVariableByteInteger(i);
 		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var connackPorperties:ConnackPorperties = {};
+		var p = {};
 		while (buffer.pos < length) {
-			var propertyId:ConnackPropertyId = readVariableByteInteger(buffer);
+			var propertyId = readVariableByteInteger(buffer);
 			switch (propertyId) {
-				case SessionExpiryInterval:
-					Reflect.setField(connackPorperties, "sessionExpiryInterval", buffer.readUInt32());
-				case AssignedClientIdentifier:
-					Reflect.setField(connackPorperties, "assignedClientIdentifier", readString(buffer));
-				case ServerKeepAlive:
-					Reflect.setField(connackPorperties, "serverKeepAlive", buffer.readUInt16());
-				case AuthenticationMethod:
-					Reflect.setField(connackPorperties, "authenticationMethod", readString(buffer));
-				case AuthenticationData:
-					Reflect.setField(connackPorperties, "authenticationData", readBinary(buffer));
-				case ResponseInformation:
-					Reflect.setField(connackPorperties, "responseInformation", readString(buffer));
-				case ServerReference:
-					Reflect.setField(connackPorperties, "serverReference", readString(buffer));
-				case ReasonString:
-					Reflect.setField(connackPorperties, "reasonString", readString(buffer));
-				case ReceiveMaximum:
-					Reflect.setField(connackPorperties, "receiveMaximum", buffer.readUInt16());
-				case TopicAliasMaximum:
-					Reflect.setField(connackPorperties, "topicAliasMaximum", buffer.readUInt16());
-				case MaximumQoS:
-					Reflect.setField(connackPorperties, "maximumQoS", buffer.readByte());
-				case RetainAvailable:
-					Reflect.setField(connackPorperties, "retainAvailable", buffer.readByte());
-				case UserProperty:
-					Reflect.setField(connackPorperties, "userProperty", readString(buffer));
-				case MaximumPacketSize:
-					Reflect.setField(connackPorperties, "maximumPacketSize", buffer.readUInt32());
-				case WildcardSubscriptionAvailable:
-					Reflect.setField(connackPorperties, "wildcardSubscriptionAvailable", buffer.readByte());
-				case SubscriptionIdentifierAvailable:
-					Reflect.setField(connackPorperties, "subscriptionIdentifierAvailable", buffer.readByte());
-				case SharedSubscriptionAvailabe:
-					Reflect.setField(connackPorperties, "sharedSubscriptionAvailabe", buffer.readByte());
+				case ConnackPropertyId.SessionExpiryInterval:
+					Reflect.setField(p, "sessionExpiryInterval", buffer.readUInt32());
+				case ConnackPropertyId.AssignedClientIdentifier:
+					Reflect.setField(p, "assignedClientIdentifier", readString(buffer));
+				case ConnackPropertyId.ServerKeepAlive:
+					Reflect.setField(p, "serverKeepAlive", buffer.readUInt16());
+				case ConnackPropertyId.AuthenticationMethod:
+					Reflect.setField(p, "authenticationMethod", readString(buffer));
+				case ConnackPropertyId.AuthenticationData:
+					Reflect.setField(p, "authenticationData", readBinary(buffer));
+				case ConnackPropertyId.ResponseInformation:
+					Reflect.setField(p, "responseInformation", readString(buffer));
+				case ConnackPropertyId.ServerReference:
+					Reflect.setField(p, "serverReference", readString(buffer));
+				case ConnackPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case ConnackPropertyId.ReceiveMaximum:
+					Reflect.setField(p, "receiveMaximum", buffer.readUInt16());
+				case ConnackPropertyId.TopicAliasMaximum:
+					Reflect.setField(p, "topicAliasMaximum", buffer.readUInt16());
+				case ConnackPropertyId.MaximumQoS:
+					Reflect.setField(p, "maximumQoS", buffer.readByte());
+				case ConnackPropertyId.RetainAvailable:
+					Reflect.setField(p, "retainAvailable", buffer.readByte());
+				case ConnackPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				case ConnackPropertyId.MaximumPacketSize:
+					Reflect.setField(p, "maximumPacketSize", buffer.readUInt32());
+				case ConnackPropertyId.WildcardSubscriptionAvailable:
+					Reflect.setField(p, "wildcardSubscriptionAvailable", buffer.readByte());
+				case ConnackPropertyId.SubscriptionIdentifierAvailable:
+					Reflect.setField(p, "subscriptionIdentifierAvailable", buffer.readByte());
+				case ConnackPropertyId.SharedSubscriptionAvailabe:
+					Reflect.setField(p, "sharedSubscriptionAvailabe", buffer.readByte());
 				default:
 					throw new MalformedPacketException('Invalid connack property id ${propertyId}.');
 			}
 		}
-		return connackPorperties;
+		return p;
 	}
 
 	function readConnackBody():ConnackBody {
-		return {};
+		Bits.readBits(7);
+		var sessionPresent = Bits.readBit();
+		var reasonCode = i.readByte();
+		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
+			throw new MalformedPacketException('Invalid connack reason code ${reasonCode}.');
+		var properties = readConnackProperties();
+		return {
+			reasonCode: reasonCode,
+			sessionPresent: sessionPresent,
+			properties: properties
+		};
+	}
+
+	function readPublishProperties():PublishProperties {
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case PublishPropertyId.PayloadFormatIndicator:
+					Reflect.setField(p, "payloadFormatIndicator", buffer.readByte());
+				case PublishPropertyId.MessageExpiryInterval:
+					Reflect.setField(p, "messageExpiryInterval", buffer.readUInt32());
+				case PublishPropertyId.ContentType:
+					Reflect.setField(p, "contentType", readString(buffer));
+				case PublishPropertyId.ResponseTopic:
+					Reflect.setField(p, "responseTopic", readString(buffer));
+				case PublishPropertyId.CorrelationData:
+					Reflect.setField(p, "correlationData", readBinary(buffer));
+				case PublishPropertyId.SubscriptionIdentifier:
+					Reflect.setField(p, "subscriptionIdentifier", readVariableByteInteger(buffer));
+				case PublishPropertyId.TopicAlias:
+					Reflect.setField(p, "topicAlias", buffer.readUInt16());
+				case PublishPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid publish property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readPublishBody():PublishBody {
-		return {};
+		var topic = readString(i);
+		var packetIdentifier = i.readUInt16();
+		var properties = readPublishProperties();
+		var payload = i.readAll();
+		return {
+			topic: topic,
+			packetIdentifier:packetIdentifier,
+			properties: properties,
+			payload: payload
+		};
 	}
 
 	function readPubackProperties():PubackProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case PubackPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case PubackPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid puback property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readPubackBody():PubackBody {
-		return {};
+		Bits.readBits(7);
+		var sessionPresent = Bits.readBit();
+		var reasonCode = i.readByte();
+		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
+			throw new MalformedPacketException('Invalid connack reason code ${reasonCode}.');
+		var properties = readConnackProperties();
+		return {
+			reasonCode: reasonCode,
+			sessionPresent: sessionPresent,
+			properties: properties
+		};
 	}
 
 	function readPubrecProperties():PubrecProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case PubrecPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case PubrecPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid puback property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readPubrecBody():PubrecBody {
@@ -239,7 +295,21 @@ class Reader {
 	}
 
 	function readPubrelProperties():PubrelProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p: = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case PubrelPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case PubrelPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid puback property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readPubrelBody():PubrelBody {
@@ -247,7 +317,21 @@ class Reader {
 	}
 
 	function readPubcompProperties():PubcompProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case PubcompPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case PubcompPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid pubcomp property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readPubcompBody():PubcompBody {
@@ -255,15 +339,46 @@ class Reader {
 	}
 
 	function readSubscribeProperties():SubscribeProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case SubscribePropertyId.SubscriptionIdentifier:
+					Reflect.setField(p, "subscriptionIdentifier", readVariableByteInteger(buffer));
+				case SubscribePropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid subscribe property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readSubscribeBody():SubscribeBody {
+		var packetIdentifier = i.readUInt16();
+		var properties = readSubackProperties();
+		var subscriptions:Array<Subscription> = [];
 		return {};
 	}
 
 	function readSubackProperties():SubackProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case SubackPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case SubackPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid suback property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readSubackBody():SubackBody {
@@ -271,7 +386,19 @@ class Reader {
 	}
 
 	function readUnsubscribeProperties():UnsubscribeProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case UnsubscribePropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid unsubscribe property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readUnsubscribeBody():UnsubscribeBody {
@@ -279,7 +406,21 @@ class Reader {
 	}
 
 	function readUnsubackProperties():UnsubackProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case UnsubackPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case UnsubackPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid unsuback property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readUnsubackBody():UnsubackBody {
@@ -287,11 +428,51 @@ class Reader {
 	}
 
 	function readDisconnectProperties():DisconnectProperties {
-		return {};
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case DisconnectPropertyId.AuthenticationMethod:
+					Reflect.setField(p, "authenticationMethod", readString(buffer));
+				case DisconnectPropertyId.AuthenticationData:
+					Reflect.setField(p, "authenticationData", readBinary(buffer));
+				case DisconnectPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case DisconnectPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid disconnect property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readDisconnectBody():DisconnectBody {
 		return {};
+	}
+
+	function readAuthProperties():AuthProperties {
+		var length = readVariableByteInteger(i);
+		var buffer = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
+		var p = {};
+		while (buffer.pos < length) {
+			var propertyId = readVariableByteInteger(buffer);
+			switch (propertyId) {
+				case AuthPropertyId.SessionExpiryInterval:
+					Reflect.setField(p, "sessionExpiryInterval", buffer.readUInt32());
+				case AuthPropertyId.ServerReference:
+					Reflect.setField(p, "serverReference", readString(buffer));
+				case AuthPropertyId.ReasonString:
+					Reflect.setField(p, "reasonString", readString(buffer));
+				case AuthPropertyId.UserProperty:
+					Reflect.setField(p, "userProperty", readString(buffer));
+				default:
+					throw new MalformedPacketException('Invalid auth property id ${propertyId}.');
+			}
+		}
+		return p;
 	}
 
 	function readAuthBody():AuthBody {
@@ -307,7 +488,35 @@ class Reader {
 			throw new MalformedPacketException('invalid packet type ${pktType}');
 		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce)
 			throw new MalformedPacketException('invalid Qos ${qos}');
-		var body = readBody(pktType);
+		var remainingLength = readVariableByteInteger(i);
+		var body = switch (pktType) {
+			case Connect:
+				readConnectBody();
+			case Connack:
+				readConnackBody();
+			case Publish:
+				readPublishBody();
+			case Puback:
+				readPubackBody();
+			case Pubrec:
+				readPubrecBody();
+			case Pubrel:
+				readPubrelBody();
+			case Pubcomp:
+				readPubcompBody();
+			case Subscribe:
+				readSubscribeBody();
+			case Suback:
+				readSubackBody();
+			case Unsubscribe:
+				readUnsubscribeBody();
+			case Unsuback:
+				readUnsubackBody();
+			case Disconnect:
+				readDisconnectBody();
+			case Auth:
+				readAuthBody();
+		}
 		return {
 			pktType: pktType,
 			dup: dup,
