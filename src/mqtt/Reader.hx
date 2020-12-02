@@ -4,6 +4,13 @@ class Reader {
 	var i:haxe.io.Input;
 	var bits:format.tools.BitsInput;
 
+	static var cls:Map<CtrlPktType, String> = [
+		Connect => "mqtt.ConnectReader", Connack => "mqtt.ConnackReader", Publish => "mqtt.PublishReader", Puback => "mqtt.PubackReader",
+		Pubrec => "mqtt.PubrecReader", Pubrel => "mqtt.PubrelReader", Pubcomp => "mqtt.PubcompReader", Subscribe => "mqtt.SubscribeReader",
+		Suback => "mqtt.SubackReader", Unsubscribe => "mqtt.UnsubscribeReader", Unsuback => "mqtt.UnsubackReader", Disconnect => "mqtt.DisconnectReader",
+		Auth => "mqtt.ConnectReader"
+	];
+
 	public function new(i) {
 		this.i = i;
 		this.i.bigEndian = true;
@@ -27,74 +34,22 @@ class Reader {
 			var byte = i.readByte();
 			value += ((byte & 127) * multiplier);
 			if (multiplier > 2097152)
-				throw new MalformedPacketException('Invalid variable Byte Integer.');
+				throw new MqttReaderException('Invalid variable Byte Integer.');
 			multiplier *= 128;
 		} while ((byte & 128) != 0);
 		return value;
 	}
 
-	function readConnectBody(i:haxe.io.Input):ConnectBody {
-		var reader = new ConnectReader(i);
-		return reader.read();
-	}
+	function readBody() {
+		var remainingLength = readVariableByteInteger();
+		if (remainingLength == 0)
+			return null;
 
-	function readConnackBody(i:haxe.io.Input):ConnackBody {
-		var reader = new ConnackReader(i);
-		return reader.read();
-	}
-
-	function readPublishBody(i:haxe.io.Input):PublishBody {
-		var reader = new PublishReader(i);
-		return reader.read();
-	}
-
-	function readPubackBody(i:haxe.io.Input):PubackBody {
-		var reader = new PubackReader(i);
-		return reader.read();
-	}
-
-	function readPubrecBody(i:haxe.io.Input):PubrecBody {
-		var reader = new PubrecReader(i);
-		return reader.read();
-	}
-
-	function readPubrelBody(i:haxe.io.Input):PubrelBody {
-		var reader = new PubrelReader(i);
-		return reader.read();
-	}
-
-	function readPubcompBody(i:haxe.io.Input):PubcompBody {
-		var reader = new PubcompReader(i);
-		return reader.read();
-	}
-
-	function readSubscribeBody(i:haxe.io.Input):SubscribeBody {
-		var reader = new SubscribeReader(i);
-		return reader.read();
-	}
-
-	function readSubackBody(i:haxe.io.Input):SubackBody {
-		var reader = new SubackReader(i);
-		return reader.read();
-	}
-
-	function readUnsubscribeBody(i:haxe.io.Input):UnsubscribeBody {
-		var reader = new UnsubscribeReader(i);
-		return reader.read();
-	}
-
-	function readUnsubackBody(i:haxe.io.Input):UnsubackBody {
-		var reader = new UnsubackReader(i);
-		return reader.read();
-	}
-
-	function readDisconnectBody(i:haxe.io.Input):DisconnectBody {
-		var reader = new DisconnectReader(i);
-		return reader.read();
-	}
-
-	function readAuthBody(i:haxe.io.Input):AuthBody {
-		var reader = new AuthReader(i);
+		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(remainingLength));
+		var cl = Type.resolveClass(cls[pktType]);
+		if (cl == null)
+			throw new MqttReaderException("resolveClass ${cls[pktType]} fail");
+		var reader = Type.createInstance(cl, [bi]);
 		return reader.read();
 	}
 
@@ -104,39 +59,10 @@ class Reader {
 		var qos = bits.readBits(2);
 		var retain = bits.readBit();
 		if (pktType <= CtrlPktType.Reserved || pktType > CtrlPktType.Auth)
-			throw new MalformedPacketException('invalid packet type ${pktType}');
+			throw new MqttReaderException('invalid packet type ${pktType}');
 		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce)
-			throw new MalformedPacketException('invalid Qos ${qos}');
-		var remainingLength = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(remainingLength));
-		var body = switch (pktType) {
-			case Connect:
-				readConnectBody(bi);
-			case Connack:
-				readConnackBody(bi);
-			case Publish:
-				readPublishBody(bi);
-			case Puback:
-				readPubackBody(bi);
-			case Pubrec:
-				readPubrecBody(bi);
-			case Pubrel:
-				readPubrelBody(bi);
-			case Pubcomp:
-				readPubcompBody(bi);
-			case Subscribe:
-				readSubscribeBody(bi);
-			case Suback:
-				readSubackBody(bi);
-			case Unsubscribe:
-				readUnsubscribeBody(bi);
-			case Unsuback:
-				readUnsubackBody(bi);
-			case Disconnect:
-				readDisconnectBody(bi);
-			case Auth:
-				readAuthBody(bi);
-		}
+			throw new MqttReaderException('invalid Qos ${qos}');
+		var body = readBody();
 		return {
 			pktType: pktType,
 			dup: dup,
@@ -172,7 +98,7 @@ class ConnectPropertiesReader extends Reader {
 				case ConnectPropertyId.MaximumPacketSize:
 					Reflect.setField(p, "maximumPacketSize", i.readUInt32());
 				default:
-					throw new MalformedPacketException('Invalid connect property id ${propertyId}.');
+					throw new MqttReaderException('Invalid connect property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -200,7 +126,7 @@ class WillPropertiesReader extends Reader {
 				case WillPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid will property id ${propertyId}.');
+					throw new MqttReaderException('Invalid will property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -234,9 +160,9 @@ class ConnectReader extends Reader {
 		var reserved = Bits.readBit();
 		var keepAlive = i.readUInt16();
 		if (protocolName != ProtocolName.Mqtt)
-			throw new MalformedPacketException('Invalid MQTT name ${protocolName}.');
+			throw new MqttReaderException('Invalid MQTT name ${protocolName}.');
 		if (protocolVersion != ProtocolVersion.V5)
-			throw new MalformedPacketException('Invalid MQTT version ${protocolVersion}.');
+			throw new MqttReaderException('Invalid MQTT version ${protocolVersion}.');
 		var connectPorperties = readConnectProperties();
 		var clientId = readString();
 		var willProperties = (willFlag) ? readWillProperties() : null;
@@ -306,7 +232,7 @@ class ConnackPropertiesReader extends Reader {
 				case ConnackPropertyId.SharedSubscriptionAvailabe:
 					Reflect.setField(p, "sharedSubscriptionAvailabe", i.readByte());
 				default:
-					throw new MalformedPacketException('Invalid connack property id ${propertyId}.');
+					throw new MqttReaderException('Invalid connack property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -326,7 +252,7 @@ class ConnackReader extends Reader {
 		var sessionPresent = Bits.readBit();
 		var reasonCode = i.readByte();
 		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
-			throw new MalformedPacketException('Invalid connack reason code ${reasonCode}.');
+			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
 		var properties = readProperties();
 		return {
 			reasonCode: reasonCode,
@@ -359,7 +285,7 @@ class PublishPropertiesReader extends Reader {
 				case PublishPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid publish property id ${propertyId}.');
+					throw new MqttReaderException('Invalid publish property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -399,7 +325,7 @@ class PubackPropertiesReader extends Reader {
 				case PubackPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid puback property id ${propertyId}.');
+					throw new MqttReaderException('Invalid puback property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -419,7 +345,7 @@ class PubackReader extends Reader {
 		var sessionPresent = Bits.readBit();
 		var reasonCode = i.readByte();
 		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
-			throw new MalformedPacketException('Invalid connack reason code ${reasonCode}.');
+			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
 		var properties = readProperties();
 		return {
 			reasonCode: reasonCode,
@@ -440,7 +366,7 @@ class PubrecPropertiesReader extends Reader {
 				case PubrecPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid puback property id ${propertyId}.');
+					throw new MqttReaderException('Invalid puback property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -471,7 +397,7 @@ class PubrelPropertiesReader extends Reader {
 				case PubrelPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid puback property id ${propertyId}.');
+					throw new MqttReaderException('Invalid puback property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -502,7 +428,7 @@ class PubcompPropertiesReader extends Reader {
 				case PubcompPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid pubcomp property id ${propertyId}.');
+					throw new MqttReaderException('Invalid pubcomp property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -533,7 +459,7 @@ class SubscribePropertiesReader extends Reader {
 				case SubscribePropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid subscribe property id ${propertyId}.');
+					throw new MqttReaderException('Invalid subscribe property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -567,7 +493,7 @@ class SubackPropertiesReader extends Reader {
 				case SubackPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid suback property id ${propertyId}.');
+					throw new MqttReaderException('Invalid suback property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -596,7 +522,7 @@ class UnsubscribePropertiesReader extends Reader {
 				case UnsubscribePropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid unsubscribe property id ${propertyId}.');
+					throw new MqttReaderException('Invalid unsubscribe property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -627,7 +553,7 @@ class UnsubackPropertiesReader extends Reader {
 				case UnsubackPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid unsuback property id ${propertyId}.');
+					throw new MqttReaderException('Invalid unsuback property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -662,7 +588,7 @@ class AuthPropertiesReader extends Reader {
 				case AuthPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid auth property id ${propertyId}.');
+					throw new MqttReaderException('Invalid auth property id ${propertyId}.');
 			}
 		}
 		return p;
@@ -697,7 +623,7 @@ class DisconnectPropertiesReader extends Reader {
 				case DisconnectPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
-					throw new MalformedPacketException('Invalid disconnect property id ${propertyId}.');
+					throw new MqttReaderException('Invalid disconnect property id ${propertyId}.');
 			}
 		}
 		return p;

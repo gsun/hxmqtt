@@ -171,4 +171,5 @@ typedef DisconnectBody = {
 	@:optional var properties:DisconnectProperties;
 }
 
-class MalformedPacketException extends haxe.Exception {}
+class MqttReaderException extends haxe.Exception {}
+class MqttWriterException extends haxe.Exception {}
