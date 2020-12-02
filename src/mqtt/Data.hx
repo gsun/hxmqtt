@@ -137,7 +137,7 @@ typedef UnsubackBody = {
 typedef PubackProperties = SubscribeProperties;
 
 typedef PubackBody = {
-	var packetIdentifier:
+	var packetIdentifier:Int;
 	var reasonCode:PubackReasonCode;
 	@:optional var properties:PubackProperties;
 }
