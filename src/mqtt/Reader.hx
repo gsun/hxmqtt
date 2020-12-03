@@ -11,11 +11,13 @@ class Reader {
 		Auth => "mqtt.ConnectReader"
 	];
 	static var pkCls:Map<PropertyKind, String> = [
-		Connect => "mqtt.ConnectPropertiesReader", Connack => "mqtt.ConnackPropertiesReader", Publish => "mqtt.PublishPropertiesReader", Puback => "mqtt.PubackPropertiesReader",
-		Pubrec => "mqtt.PubrecPropertiesReader", Pubrel => "mqtt.PubrelPropertiesReader", Pubcomp => "mqtt.PubcompPropertiesReader", Subscribe => "mqtt.SubscribePropertiesReader",
-		Suback => "mqtt.SubackPropertiesReader", Unsubscribe => "mqtt.UnsubscribePropertiesReader", Unsuback => "mqtt.UnsubackPropertiesReader", Disconnect => "mqtt.DisconnectPropertiesReader",
+		Connect => "mqtt.ConnectPropertiesReader", Connack => "mqtt.ConnackPropertiesReader", Publish => "mqtt.PublishPropertiesReader",
+		Puback => "mqtt.PubackPropertiesReader", Pubrec => "mqtt.PubrecPropertiesReader", Pubrel => "mqtt.PubrelPropertiesReader",
+		Pubcomp => "mqtt.PubcompPropertiesReader", Subscribe => "mqtt.SubscribePropertiesReader", Suback => "mqtt.SubackPropertiesReader",
+		Unsubscribe => "mqtt.UnsubscribePropertiesReader", Unsuback => "mqtt.UnsubackPropertiesReader", Disconnect => "mqtt.DisconnectPropertiesReader",
 		Auth => "mqtt.ConnectPropertiesReader", Will => "mqtt.WillPropertiesReader"
 	];
+
 	public function new(i) {
 		this.i = i;
 		this.i.bigEndian = true;
@@ -31,15 +33,15 @@ class Reader {
 		var size = i.readUInt16();
 		return i.read(size);
 	}
-	
+
 	inline function readByte() {
 		return i.readByte();
 	}
-	
+
 	inline function readUInt16() {
 		return i.readUInt16();
 	}
-	
+
 	inline function readUInt32() {
 		return i.readUInt32();
 	}
@@ -61,7 +63,7 @@ class Reader {
 		var cl = Type.resolveClass(ptCls[t]);
 		if (cl == null)
 			throw new MqttReaderException("pkt reader ${t} resolveClass ${ptCls[t]} fail");
-			
+
 		var remainingLength = readVariableByteInteger();
 		if (remainingLength == 0)
 			return null;
@@ -70,16 +72,16 @@ class Reader {
 		var reader = Type.createInstance(cl, [bi]);
 		return reader.read();
 	}
-	
+
 	function readProperties(pc:PropertyKind) {
 		var cl = Type.resolveClass(pkCls[pc]);
 		if (cl == null)
 			throw new MqttReaderException("property reader ${pc} resolveClass ${pkCls[pc]} fail");
-			
+
 		var length = readVariableByteInteger();
 		if (length == 0)
 			return null;
-			
+
 		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
 		var reader = Type.createInstance(cl, [bi]);
 		return reader.read();

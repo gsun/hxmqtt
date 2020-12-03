@@ -299,7 +299,7 @@ enum abstract UnsubackPropertyId(Int) from Int to Int = {
 enum abstract PropertyKind(Int) from Int to Int = {
 	var Publish = 1;
 	var Connect;
-	var Connack
+	var Connack;
 	var Subscribe;
 	var Disconnect;
 	var Will;
