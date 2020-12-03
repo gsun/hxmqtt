@@ -4,27 +4,44 @@ class Reader {
 	var i:haxe.io.Input;
 	var bits:format.tools.BitsInput;
 
-	static var cls:Map<CtrlPktType, String> = [
+	static var ptCls:Map<CtrlPktType, String> = [
 		Connect => "mqtt.ConnectReader", Connack => "mqtt.ConnackReader", Publish => "mqtt.PublishReader", Puback => "mqtt.PubackReader",
 		Pubrec => "mqtt.PubrecReader", Pubrel => "mqtt.PubrelReader", Pubcomp => "mqtt.PubcompReader", Subscribe => "mqtt.SubscribeReader",
 		Suback => "mqtt.SubackReader", Unsubscribe => "mqtt.UnsubscribeReader", Unsuback => "mqtt.UnsubackReader", Disconnect => "mqtt.DisconnectReader",
 		Auth => "mqtt.ConnectReader"
 	];
-
+	static var pkCls:Map<PropertyKind, String> = [
+		Connect => "mqtt.ConnectPropertiesReader", Connack => "mqtt.ConnackPropertiesReader", Publish => "mqtt.PublishPropertiesReader", Puback => "mqtt.PubackPropertiesReader",
+		Pubrec => "mqtt.PubrecPropertiesReader", Pubrel => "mqtt.PubrelPropertiesReader", Pubcomp => "mqtt.PubcompPropertiesReader", Subscribe => "mqtt.SubscribePropertiesReader",
+		Suback => "mqtt.SubackPropertiesReader", Unsubscribe => "mqtt.UnsubscribePropertiesReader", Unsuback => "mqtt.UnsubackPropertiesReader", Disconnect => "mqtt.DisconnectPropertiesReader",
+		Auth => "mqtt.ConnectPropertiesReader", Will => "mqtt.WillPropertiesReader"
+	];
 	public function new(i) {
 		this.i = i;
 		this.i.bigEndian = true;
 		bits = new format.tools.BitsInput(i);
 	}
 
-	function readString() {
+	inline function readString() {
 		var size = i.readUInt16();
 		return i.readString(size, UTF8);
 	}
 
-	function readBinary() {
+	inline function readBinary() {
 		var size = i.readUInt16();
 		return i.read(size);
+	}
+	
+	inline function readByte() {
+		return i.readByte();
+	}
+	
+	inline function readUInt16() {
+		return i.readUInt16();
+	}
+	
+	inline function readUInt32() {
+		return i.readUInt32();
 	}
 
 	function readVariableByteInteger() {
@@ -40,15 +57,30 @@ class Reader {
 		return value;
 	}
 
-	function readBody(pktType:CtrlPktType) {
+	function readBody(t:CtrlPktType) {
+		var cl = Type.resolveClass(ptCls[t]);
+		if (cl == null)
+			throw new MqttReaderException("pkt reader ${t} resolveClass ${ptCls[t]} fail");
+			
 		var remainingLength = readVariableByteInteger();
 		if (remainingLength == 0)
 			return null;
 
 		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(remainingLength));
-		var cl = Type.resolveClass(cls[pktType]);
+		var reader = Type.createInstance(cl, [bi]);
+		return reader.read();
+	}
+	
+	function readProperties(pc:PropertyKind) {
+		var cl = Type.resolveClass(pkCls[pc]);
 		if (cl == null)
-			throw new MqttReaderException("resolveClass ${cls[pktType]} fail");
+			throw new MqttReaderException("property reader ${pc} resolveClass ${pkCls[pc]} fail");
+			
+		var length = readVariableByteInteger();
+		if (length == 0)
+			return null;
+			
+		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
 		var reader = Type.createInstance(cl, [bi]);
 		return reader.read();
 	}
@@ -80,23 +112,23 @@ class ConnectPropertiesReader extends Reader {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case ConnectPropertyId.SessionExpiryInterval:
-					Reflect.setField(p, "sessionExpiryInterval", i.readUInt32());
+					Reflect.setField(p, "sessionExpiryInterval", readUInt32());
 				case ConnectPropertyId.AuthenticationMethod:
 					Reflect.setField(p, "authenticationMethod", readString());
 				case ConnectPropertyId.AuthenticationData:
 					Reflect.setField(p, "authenticationData", readBinary());
 				case ConnectPropertyId.RequestProblemInformation:
-					Reflect.setField(p, "requestProblemInformation", i.readByte());
+					Reflect.setField(p, "requestProblemInformation", readByte());
 				case ConnectPropertyId.RequestResponseInformation:
-					Reflect.setField(p, "requestResponseInformation", i.readByte());
+					Reflect.setField(p, "requestResponseInformation", readByte());
 				case ConnectPropertyId.ReceiveMaximum:
-					Reflect.setField(p, "receiveMaximum", i.readUInt16());
+					Reflect.setField(p, "receiveMaximum", readUInt16());
 				case ConnectPropertyId.TopicAliasMaximum:
-					Reflect.setField(p, "topicAliasMaximum", i.readUInt16());
+					Reflect.setField(p, "topicAliasMaximum", readUInt16());
 				case ConnectPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				case ConnectPropertyId.MaximumPacketSize:
-					Reflect.setField(p, "maximumPacketSize", i.readUInt32());
+					Reflect.setField(p, "maximumPacketSize", readUInt32());
 				default:
 					throw new MqttReaderException('Invalid connect property id ${propertyId}.');
 			}
@@ -112,9 +144,9 @@ class WillPropertiesReader extends Reader {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case WillPropertyId.PayloadFormatIndicator:
-					Reflect.setField(p, "payloadFormatIndicator", i.readByte());
+					Reflect.setField(p, "payloadFormatIndicator", readByte());
 				case WillPropertyId.MessageExpiryInterval:
-					Reflect.setField(p, "messageExpiryInterval", i.readUInt32());
+					Reflect.setField(p, "messageExpiryInterval", readUInt32());
 				case WillPropertyId.ContentType:
 					Reflect.setField(p, "contentType", readString());
 				case WillPropertyId.ResponseTopic:
@@ -122,7 +154,7 @@ class WillPropertiesReader extends Reader {
 				case WillPropertyId.CorrelationData:
 					Reflect.setField(p, "correlationData", readBinary());
 				case WillPropertyId.WillDelayInterval:
-					Reflect.setField(p, "willDelayInterval", i.readUInt32());
+					Reflect.setField(p, "willDelayInterval", readUInt32());
 				case WillPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
@@ -134,23 +166,9 @@ class WillPropertiesReader extends Reader {
 }
 
 class ConnectReader extends Reader {
-	function readConnectProperties():ConnectProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new ConnectPropertiesReader(bi);
-		return reader.read();
-	}
-
-	function readWillProperties():WillProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new WillPropertiesReader(bi);
-		return reader.read();
-	}
-
-	public function read():AuthBody {
+	public function read():ConnectBody {
 		var protocolName = readString();
-		var protocolVersion = i.readByte();
+		var protocolVersion = readByte();
 		var userNameFlag = Bits.readBit();
 		var passwordFlag = Bits.readBit();
 		var willRetainFlag = Bits.readBit();
@@ -158,14 +176,14 @@ class ConnectReader extends Reader {
 		var willFlag = Bits.readBit();
 		var cleanStart = Bits.readBit();
 		var reserved = Bits.readBit();
-		var keepAlive = i.readUInt16();
+		var keepAlive = readUInt16();
 		if (protocolName != ProtocolName.Mqtt)
 			throw new MqttReaderException('Invalid MQTT name ${protocolName}.');
 		if (protocolVersion != ProtocolVersion.V5)
 			throw new MqttReaderException('Invalid MQTT version ${protocolVersion}.');
-		var connectPorperties = readConnectProperties();
+		var connectPorperties = readProperties(PropertyKind.Connect);
 		var clientId = readString();
-		var willProperties = (willFlag) ? readWillProperties() : null;
+		var willProperties = (willFlag) ? readProperties(PropertyKind.Will) : null;
 		var willTopic = (willFlag) ? readString() : null;
 		var willPayload = (willFlag) ? readBinary() : null;
 		var userName = (userNameFlag) ? readString() : null;
@@ -198,11 +216,11 @@ class ConnackPropertiesReader extends Reader {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case ConnackPropertyId.SessionExpiryInterval:
-					Reflect.setField(p, "sessionExpiryInterval", i.readUInt32());
+					Reflect.setField(p, "sessionExpiryInterval", readUInt32());
 				case ConnackPropertyId.AssignedClientIdentifier:
 					Reflect.setField(p, "assignedClientIdentifier", readString());
 				case ConnackPropertyId.ServerKeepAlive:
-					Reflect.setField(p, "serverKeepAlive", i.readUInt16());
+					Reflect.setField(p, "serverKeepAlive", readUInt16());
 				case ConnackPropertyId.AuthenticationMethod:
 					Reflect.setField(p, "authenticationMethod", readString());
 				case ConnackPropertyId.AuthenticationData:
@@ -214,23 +232,23 @@ class ConnackPropertiesReader extends Reader {
 				case ConnackPropertyId.ReasonString:
 					Reflect.setField(p, "reasonString", readString());
 				case ConnackPropertyId.ReceiveMaximum:
-					Reflect.setField(p, "receiveMaximum", i.readUInt16());
+					Reflect.setField(p, "receiveMaximum", readUInt16());
 				case ConnackPropertyId.TopicAliasMaximum:
-					Reflect.setField(p, "topicAliasMaximum", i.readUInt16());
+					Reflect.setField(p, "topicAliasMaximum", readUInt16());
 				case ConnackPropertyId.MaximumQoS:
-					Reflect.setField(p, "maximumQoS", i.readByte());
+					Reflect.setField(p, "maximumQoS", readByte());
 				case ConnackPropertyId.RetainAvailable:
-					Reflect.setField(p, "retainAvailable", i.readByte());
+					Reflect.setField(p, "retainAvailable", readByte());
 				case ConnackPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				case ConnackPropertyId.MaximumPacketSize:
-					Reflect.setField(p, "maximumPacketSize", i.readUInt32());
+					Reflect.setField(p, "maximumPacketSize", readUInt32());
 				case ConnackPropertyId.WildcardSubscriptionAvailable:
-					Reflect.setField(p, "wildcardSubscriptionAvailable", i.readByte());
+					Reflect.setField(p, "wildcardSubscriptionAvailable", readByte());
 				case ConnackPropertyId.SubscriptionIdentifierAvailable:
-					Reflect.setField(p, "subscriptionIdentifierAvailable", i.readByte());
+					Reflect.setField(p, "subscriptionIdentifierAvailable", readByte());
 				case ConnackPropertyId.SharedSubscriptionAvailabe:
-					Reflect.setField(p, "sharedSubscriptionAvailabe", i.readByte());
+					Reflect.setField(p, "sharedSubscriptionAvailabe", readByte());
 				default:
 					throw new MqttReaderException('Invalid connack property id ${propertyId}.');
 			}
@@ -240,20 +258,13 @@ class ConnackPropertiesReader extends Reader {
 }
 
 class ConnackReader extends Reader {
-	function readProperties():ConnackProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new ConnackPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():ConnackBody {
 		Bits.readBits(7);
 		var sessionPresent = Bits.readBit();
-		var reasonCode = i.readByte();
+		var reasonCode = readByte();
 		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
-		var properties = readProperties();
+		var properties = readProperties(PropertyKind.Connack);
 		return {
 			reasonCode: reasonCode,
 			sessionPresent: sessionPresent,
@@ -269,9 +280,9 @@ class PublishPropertiesReader extends Reader {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case PublishPropertyId.PayloadFormatIndicator:
-					Reflect.setField(p, "payloadFormatIndicator", i.readByte());
+					Reflect.setField(p, "payloadFormatIndicator", readByte());
 				case PublishPropertyId.MessageExpiryInterval:
-					Reflect.setField(p, "messageExpiryInterval", i.readUInt32());
+					Reflect.setField(p, "messageExpiryInterval", readUInt32());
 				case PublishPropertyId.ContentType:
 					Reflect.setField(p, "contentType", readString());
 				case PublishPropertyId.ResponseTopic:
@@ -281,7 +292,7 @@ class PublishPropertiesReader extends Reader {
 				case PublishPropertyId.SubscriptionIdentifier:
 					Reflect.setField(p, "subscriptionIdentifier", readVariableByteInteger());
 				case PublishPropertyId.TopicAlias:
-					Reflect.setField(p, "topicAlias", i.readUInt16());
+					Reflect.setField(p, "topicAlias", readUInt16());
 				case PublishPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
@@ -293,17 +304,10 @@ class PublishPropertiesReader extends Reader {
 }
 
 class PublishReader extends Reader {
-	function readProperties():PublishProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new PublishPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():PublishBody {
 		var topic = readString();
-		var packetIdentifier = i.readUInt16();
-		var properties = readProperties();
+		var packetIdentifier = readUInt16();
+		var properties = readProperties(PropertyKind.Publish);
 		var payload = i.readAll();
 		return {
 			topic: topic,
@@ -333,20 +337,13 @@ class PubackPropertiesReader extends Reader {
 }
 
 class PubackReader extends Reader {
-	function readProperties():PubackProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new PubackPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():PubackBody {
 		Bits.readBits(7);
 		var sessionPresent = Bits.readBit();
-		var reasonCode = i.readByte();
+		var reasonCode = readByte();
 		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
-		var properties = readProperties();
+		var properties = readProperties(PropertyKind.Puback);
 		return {
 			reasonCode: reasonCode,
 			sessionPresent: sessionPresent,
@@ -374,13 +371,6 @@ class PubrecPropertiesReader extends Reader {
 }
 
 class PubrecReader extends Reader {
-	function readProperties():PubrecProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new PubrecPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():PubrecBody {
 		return {};
 	}
@@ -405,13 +395,6 @@ class PubrelPropertiesReader extends Reader {
 }
 
 class PubrelReader extends Reader {
-	function readProperties():PubrelProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new PubrelPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():PubrelBody {
 		return {};
 	}
@@ -436,13 +419,6 @@ class PubcompPropertiesReader extends Reader {
 }
 
 class PubcompReader extends Reader {
-	function readProperties():PubcompProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new PubcompPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():PubcompBody {
 		return {};
 	}
@@ -467,16 +443,9 @@ class SubscribePropertiesReader extends Reader {
 }
 
 class SubscribeReader extends Reader {
-	function readProperties():SubscribeProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new SubscribePropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():SubscribeBody {
-		var packetIdentifier = i.readUInt16();
-		var properties = readSubackProperties();
+		var packetIdentifier = readUInt16();
+		var properties = readSubackProperties(PropertyKind.Subscribe);
 		var subscriptions:Array<Subscription> = [];
 		return {};
 	}
@@ -501,13 +470,6 @@ class SubackPropertiesReader extends Reader {
 }
 
 class SubackReader extends Reader {
-	function readProperties():SubackProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new SubackPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():SubackBody {
 		return {};
 	}
@@ -530,13 +492,6 @@ class UnsubscribePropertiesReader extends Reader {
 }
 
 class UnsubscribeReader extends Reader {
-	function readProperties():UnsubscribeProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new UnsubscribePropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():UnsubscribeBody {
 		return {};
 	}
@@ -561,13 +516,6 @@ class UnsubackPropertiesReader extends Reader {
 }
 
 class UnsubackReader extends Reader {
-	function readProperties():UnsubackProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new UnsubackPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():UnsubackBody {
 		return {};
 	}
@@ -580,7 +528,7 @@ class AuthPropertiesReader extends Reader {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case AuthPropertyId.SessionExpiryInterval:
-					Reflect.setField(p, "sessionExpiryInterval", i.readUInt32());
+					Reflect.setField(p, "sessionExpiryInterval", readUInt32());
 				case AuthPropertyId.ServerReference:
 					Reflect.setField(p, "serverReference", readString());
 				case AuthPropertyId.ReasonString:
@@ -596,13 +544,6 @@ class AuthPropertiesReader extends Reader {
 }
 
 class AuthReader extends Reader {
-	function readProperties():AuthProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new AuthPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():AuthBody {
 		return {};
 	}
@@ -631,13 +572,6 @@ class DisconnectPropertiesReader extends Reader {
 }
 
 class DisconnectReader extends Reader {
-	function readProperties():DisconnectProperties {
-		var length = readVariableByteInteger();
-		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
-		var reader = new DisconnectPropertiesReader(bi);
-		return reader.read();
-	}
-
 	public function read():DisconnectBody {
 		return {};
 	}
