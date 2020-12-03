@@ -295,3 +295,20 @@ enum abstract UnsubackPropertyId(Int) from Int to Int = {
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
+
+enum abstract PropertyClass(Int) from Int to Int = {
+	var Publish = 1;
+	var Connect;
+	var Connack
+	var Subscribe;
+	var Disconnect;
+	var Will;
+	var Auth;
+	var Puback;
+	var Pubrec;
+	var Pubrel;
+	var Pubcomp;
+	var Suback;
+	var Unsubscribe;
+	var Unsuback;
+}

@@ -17,17 +17,17 @@ class Reader {
 		bits = new format.tools.BitsInput(i);
 	}
 
-	function readString(i:haxe.io.Input) {
+	function readString() {
 		var size = i.readUInt16();
 		return i.readString(size, UTF8);
 	}
 
-	function readBinary(i:haxe.io.Input) {
+	function readBinary() {
 		var size = i.readUInt16();
 		return i.read(size);
 	}
 
-	function readVariableByteInteger(i:haxe.io.Input) {
+	function readVariableByteInteger() {
 		var value = 0;
 		var multiplier = 1;
 		do {
@@ -40,7 +40,7 @@ class Reader {
 		return value;
 	}
 
-	function readBody() {
+	function readBody(pktType:CtrlPktType) {
 		var remainingLength = readVariableByteInteger();
 		if (remainingLength == 0)
 			return null;
@@ -62,7 +62,7 @@ class Reader {
 			throw new MqttReaderException('invalid packet type ${pktType}');
 		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce)
 			throw new MqttReaderException('invalid Qos ${qos}');
-		var body = readBody();
+		var body = readBody(pktType);
 		return {
 			pktType: pktType,
 			dup: dup,
