@@ -89,7 +89,7 @@ class Reader {
 		return reader.read();
 	}
 
-	public function read():MqttPacket {
+	public function read():Dynamic {
 		var pktType = bits.readBits(4);
 		var dup = bits.readBit();
 		var qos = bits.readBits(2);
@@ -110,7 +110,7 @@ class Reader {
 }
 
 class ConnectPropertiesReader extends Reader {
-	override function read():ConnectProperties {
+	override function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -142,7 +142,7 @@ class ConnectPropertiesReader extends Reader {
 }
 
 class WillPropertiesReader extends Reader {
-	override function read():WillProperties {
+	override function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -170,16 +170,16 @@ class WillPropertiesReader extends Reader {
 }
 
 class ConnectReader extends Reader {
-	override public function read():ConnectBody {
+	override public function read():Dynamic {
 		var protocolName = readString();
 		var protocolVersion = readByte();
-		var userNameFlag = Bits.readBit();
-		var passwordFlag = Bits.readBit();
-		var willRetainFlag = Bits.readBit();
-		var willQos = Bits.readBits(2);
-		var willFlag = Bits.readBit();
-		var cleanStart = Bits.readBit();
-		var reserved = Bits.readBit();
+		var userNameFlag = bits.readBit();
+		var passwordFlag = bits.readBit();
+		var willRetainFlag = bits.readBit();
+		var willQos = bits.readBits(2);
+		var willFlag = bits.readBit();
+		var cleanStart = bits.readBit();
+		var reserved = bits.readBit();
 		var keepAlive = readUInt16();
 		if (protocolName != ProtocolName.Mqtt)
 			throw new MqttReaderException('Invalid MQTT name ${protocolName}.');
@@ -214,7 +214,7 @@ class ConnectReader extends Reader {
 }
 
 class ConnackPropertiesReader extends Reader {
-	override function read():ConnackProperties {
+	override function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -262,9 +262,9 @@ class ConnackPropertiesReader extends Reader {
 }
 
 class ConnackReader extends Reader {
-	override public function read():ConnackBody {
-		Bits.readBits(7);
-		var sessionPresent = Bits.readBit();
+	override public function read():Dynamic {
+		bits.readBits(7);
+		var sessionPresent = bits.readBit();
 		var reasonCode = readByte();
 		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
@@ -278,7 +278,7 @@ class ConnackReader extends Reader {
 }
 
 class PublishPropertiesReader extends Reader {
-	override function read():PublishProperties {
+	override function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -308,7 +308,7 @@ class PublishPropertiesReader extends Reader {
 }
 
 class PublishReader extends Reader {
-	override public function read():PublishBody {
+	override public function read():Dynamic {
 		var topic = readString();
 		var packetIdentifier = readUInt16();
 		var properties = readProperties(PropertyKind.Publish);
@@ -323,7 +323,7 @@ class PublishReader extends Reader {
 }
 
 class PubackPropertiesReader extends Reader {
-	function read():PubackProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -341,9 +341,9 @@ class PubackPropertiesReader extends Reader {
 }
 
 class PubackReader extends Reader {
-	public function read():PubackBody {
-		Bits.readBits(7);
-		var sessionPresent = Bits.readBit();
+	override public function read():Dynamic {
+		bits.readBits(7);
+		var sessionPresent = bits.readBit();
 		var reasonCode = readByte();
 		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
@@ -357,7 +357,7 @@ class PubackReader extends Reader {
 }
 
 class PubrecPropertiesReader extends Reader {
-	function read():PubrecProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -375,13 +375,13 @@ class PubrecPropertiesReader extends Reader {
 }
 
 class PubrecReader extends Reader {
-	public function read():PubrecBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class PubrelPropertiesReader extends Reader {
-	function read():PubrelProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -399,13 +399,13 @@ class PubrelPropertiesReader extends Reader {
 }
 
 class PubrelReader extends Reader {
-	public function read():PubrelBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class PubcompPropertiesReader extends Reader {
-	function read():PubcompProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -423,13 +423,13 @@ class PubcompPropertiesReader extends Reader {
 }
 
 class PubcompReader extends Reader {
-	public function read():PubcompBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class SubscribePropertiesReader extends Reader {
-	function read():SubscribeProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -447,7 +447,7 @@ class SubscribePropertiesReader extends Reader {
 }
 
 class SubscribeReader extends Reader {
-	public function read():SubscribeBody {
+	override public function read():Dynamic {
 		var packetIdentifier = readUInt16();
 		var properties = readSubackProperties(PropertyKind.Subscribe);
 		var subscriptions:Array<Subscription> = [];
@@ -456,7 +456,7 @@ class SubscribeReader extends Reader {
 }
 
 class SubackPropertiesReader extends Reader {
-	function read():SubackProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -474,13 +474,13 @@ class SubackPropertiesReader extends Reader {
 }
 
 class SubackReader extends Reader {
-	public function read():SubackBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class UnsubscribePropertiesReader extends Reader {
-	function read():UnsubscribeProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -496,13 +496,13 @@ class UnsubscribePropertiesReader extends Reader {
 }
 
 class UnsubscribeReader extends Reader {
-	public function read():UnsubscribeBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class UnsubackPropertiesReader extends Reader {
-	function read():UnsubackProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -520,13 +520,13 @@ class UnsubackPropertiesReader extends Reader {
 }
 
 class UnsubackReader extends Reader {
-	public function read():UnsubackBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class AuthPropertiesReader extends Reader {
-	function read():AuthProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -548,13 +548,13 @@ class AuthPropertiesReader extends Reader {
 }
 
 class AuthReader extends Reader {
-	public function read():AuthBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
 
 class DisconnectPropertiesReader extends Reader {
-	public function read():DisconnectProperties {
+	override public function read():Dynamic {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -576,7 +576,7 @@ class DisconnectPropertiesReader extends Reader {
 }
 
 class DisconnectReader extends Reader {
-	public function read():DisconnectBody {
+	override public function read():Dynamic {
 		return {};
 	}
 }
