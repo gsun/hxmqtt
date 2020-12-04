@@ -2,6 +2,7 @@
 -cp test
 -main Test
 -lib utest
+-lib format
 -neko mqtt.n
 
 --next

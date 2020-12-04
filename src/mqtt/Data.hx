@@ -1,6 +1,7 @@
 package mqtt;
 
 import haxe.io.Bytes;
+import mqtt.Constants;
 
 typedef MqttPacket = {
 	var pktType:CtrlPktType;
@@ -97,8 +98,9 @@ typedef ConnackBody = {
 	@:optional var properties:ConnackProperties;
 }
 
-typedef SubscriptionBody = {
-	var topic:String var qos:QoS;
+typedef Subscription = {
+	var topic:String;
+	var qos:QoS;
 	@:optional var nl:Bool;
 	@:optional var rap:Bool;
 	@:optional var rh:Int;
@@ -116,7 +118,7 @@ typedef SubscribeBody = {
 
 typedef SubackProperties = SubscribeProperties;
 
-typedef Suback = {
+typedef SubackBody = {
 	@:optional var properties:SubackProperties;
 	var granted:Array<Int>;
 }
@@ -125,7 +127,7 @@ typedef UnsubscribeProperties = SubscribeProperties;
 
 typedef UnsubscribeBody = {
 	@:optional var properties:UnsubscribeProperties;
-	@:optional var unsubscriptions:Array<String>
+	@:optional var unsubscriptions:Array<String>;
 }
 
 typedef UnsubackProperties = SubscribeProperties;
@@ -145,7 +147,7 @@ typedef PubackBody = {
 typedef PubcompProperties = SubscribeProperties;
 
 typedef PubcompBody = {
-	@:optional var properties:PubcompProperties
+	@:optional var properties:PubcompProperties;
 }
 
 typedef PubrelProperties = SubscribeProperties;
@@ -157,7 +159,7 @@ typedef PubrelBody = {
 typedef PubrecProperties = SubscribeProperties;
 
 typedef PubrecBody = {
-	@:optional var properties:PubrecProperties
+	@:optional var properties:PubrecProperties;
 }
 
 typedef DisconnectProperties = {
@@ -169,6 +171,17 @@ typedef DisconnectProperties = {
 
 typedef DisconnectBody = {
 	@:optional var properties:DisconnectProperties;
+}
+
+typedef AuthProperties = {
+	@:optional var sessionExpiryInterval:Int;
+	@:optional var reasonString:String;
+	@:optional var userProperties:Dynamic;
+	@:optional var serverReference:String;
+}
+
+typedef AuthBody = {
+	@:optional var properties:AuthProperties;
 }
 
 class MqttReaderException extends haxe.Exception {}

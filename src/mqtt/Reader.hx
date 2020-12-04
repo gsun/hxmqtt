@@ -1,4 +1,6 @@
 package mqtt;
+import mqtt.Constants;
+import mqtt.Data;
 
 class Reader {
 	var i:haxe.io.Input;
@@ -42,8 +44,8 @@ class Reader {
 		return i.readUInt16();
 	}
 
-	inline function readUInt32() {
-		return i.readUInt32();
+	inline function readInt32() {
+		return i.readInt32();
 	}
 
 	function readVariableByteInteger() {
@@ -108,13 +110,13 @@ class Reader {
 }
 
 class ConnectPropertiesReader extends Reader {
-	function read():ConnectProperties {
+	override function read():ConnectProperties {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case ConnectPropertyId.SessionExpiryInterval:
-					Reflect.setField(p, "sessionExpiryInterval", readUInt32());
+					Reflect.setField(p, "sessionExpiryInterval", readInt32());
 				case ConnectPropertyId.AuthenticationMethod:
 					Reflect.setField(p, "authenticationMethod", readString());
 				case ConnectPropertyId.AuthenticationData:
@@ -130,7 +132,7 @@ class ConnectPropertiesReader extends Reader {
 				case ConnectPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				case ConnectPropertyId.MaximumPacketSize:
-					Reflect.setField(p, "maximumPacketSize", readUInt32());
+					Reflect.setField(p, "maximumPacketSize", readInt32());
 				default:
 					throw new MqttReaderException('Invalid connect property id ${propertyId}.');
 			}
@@ -140,7 +142,7 @@ class ConnectPropertiesReader extends Reader {
 }
 
 class WillPropertiesReader extends Reader {
-	function read():WillProperties {
+	override function read():WillProperties {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -148,7 +150,7 @@ class WillPropertiesReader extends Reader {
 				case WillPropertyId.PayloadFormatIndicator:
 					Reflect.setField(p, "payloadFormatIndicator", readByte());
 				case WillPropertyId.MessageExpiryInterval:
-					Reflect.setField(p, "messageExpiryInterval", readUInt32());
+					Reflect.setField(p, "messageExpiryInterval", readInt32());
 				case WillPropertyId.ContentType:
 					Reflect.setField(p, "contentType", readString());
 				case WillPropertyId.ResponseTopic:
@@ -156,7 +158,7 @@ class WillPropertiesReader extends Reader {
 				case WillPropertyId.CorrelationData:
 					Reflect.setField(p, "correlationData", readBinary());
 				case WillPropertyId.WillDelayInterval:
-					Reflect.setField(p, "willDelayInterval", readUInt32());
+					Reflect.setField(p, "willDelayInterval", readInt32());
 				case WillPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				default:
@@ -168,7 +170,7 @@ class WillPropertiesReader extends Reader {
 }
 
 class ConnectReader extends Reader {
-	public function read():ConnectBody {
+	override public function read():ConnectBody {
 		var protocolName = readString();
 		var protocolVersion = readByte();
 		var userNameFlag = Bits.readBit();
@@ -192,7 +194,7 @@ class ConnectReader extends Reader {
 		var password = (passwordFlag) ? readBinary() : null;
 		var will = {
 			topic: willTopic,
-			payload: willPayload;
+			payload: willPayload,
 			qos: willQos,
 			retain: willRetainFlag,
 			properties: willProperties
@@ -212,13 +214,13 @@ class ConnectReader extends Reader {
 }
 
 class ConnackPropertiesReader extends Reader {
-	function read():ConnackProperties {
+	override function read():ConnackProperties {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case ConnackPropertyId.SessionExpiryInterval:
-					Reflect.setField(p, "sessionExpiryInterval", readUInt32());
+					Reflect.setField(p, "sessionExpiryInterval", readInt32());
 				case ConnackPropertyId.AssignedClientIdentifier:
 					Reflect.setField(p, "assignedClientIdentifier", readString());
 				case ConnackPropertyId.ServerKeepAlive:
@@ -244,7 +246,7 @@ class ConnackPropertiesReader extends Reader {
 				case ConnackPropertyId.UserProperty:
 					Reflect.setField(p, "userProperty", readString());
 				case ConnackPropertyId.MaximumPacketSize:
-					Reflect.setField(p, "maximumPacketSize", readUInt32());
+					Reflect.setField(p, "maximumPacketSize", readInt32());
 				case ConnackPropertyId.WildcardSubscriptionAvailable:
 					Reflect.setField(p, "wildcardSubscriptionAvailable", readByte());
 				case ConnackPropertyId.SubscriptionIdentifierAvailable:
@@ -260,7 +262,7 @@ class ConnackPropertiesReader extends Reader {
 }
 
 class ConnackReader extends Reader {
-	public function read():ConnackBody {
+	override public function read():ConnackBody {
 		Bits.readBits(7);
 		var sessionPresent = Bits.readBit();
 		var reasonCode = readByte();
@@ -276,7 +278,7 @@ class ConnackReader extends Reader {
 }
 
 class PublishPropertiesReader extends Reader {
-	function read():PublishProperties {
+	override function read():PublishProperties {
 		var p = {};
 		while (i.pos < i.buf.length) {
 			var propertyId = readVariableByteInteger();
@@ -284,7 +286,7 @@ class PublishPropertiesReader extends Reader {
 				case PublishPropertyId.PayloadFormatIndicator:
 					Reflect.setField(p, "payloadFormatIndicator", readByte());
 				case PublishPropertyId.MessageExpiryInterval:
-					Reflect.setField(p, "messageExpiryInterval", readUInt32());
+					Reflect.setField(p, "messageExpiryInterval", readInt32());
 				case PublishPropertyId.ContentType:
 					Reflect.setField(p, "contentType", readString());
 				case PublishPropertyId.ResponseTopic:
@@ -306,7 +308,7 @@ class PublishPropertiesReader extends Reader {
 }
 
 class PublishReader extends Reader {
-	public function read():PublishBody {
+	override public function read():PublishBody {
 		var topic = readString();
 		var packetIdentifier = readUInt16();
 		var properties = readProperties(PropertyKind.Publish);
@@ -530,7 +532,7 @@ class AuthPropertiesReader extends Reader {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case AuthPropertyId.SessionExpiryInterval:
-					Reflect.setField(p, "sessionExpiryInterval", readUInt32());
+					Reflect.setField(p, "sessionExpiryInterval", readInt32());
 				case AuthPropertyId.ServerReference:
 					Reflect.setField(p, "serverReference", readString());
 				case AuthPropertyId.ReasonString:

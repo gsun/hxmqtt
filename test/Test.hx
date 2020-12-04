@@ -3,6 +3,7 @@ import utest.ui.Report;
 import utest.Assert;
 import haxe.io.Bytes;
 import haxe.crypto.BaseCode;
+import mqtt.*;
 
 class Test {
 	public static function main() {
@@ -57,6 +58,9 @@ class SimpleTest extends utest.Test {
 		Assert.equals(p2, "107D044D51545453601E2F11004D2211B02700064221C819117126047465737404746573741504746573741604123404746573742F18004D21020010E130474657374805746F7069639041234260474657374047465737405746F7069630443210");
 		var p3 = Bytes.ofHex(p2);
 		Assert.equals(p2, p3.toHex().toUpperCase());
+		
+		//var r = new Reader(new haxe.io.BytesInput(p3));
+		
 		
 	}
 }
