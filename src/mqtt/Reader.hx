@@ -50,6 +50,13 @@ class Reader {
 		return i.readInt32();
 	}
 
+	inline function eof() {
+		var b = cast(i, haxe.io.BufferInput);
+		if (b != null)
+			return (b.pos >= b.buf.length) ? true : false;
+		return false;
+	}
+
 	function readVariableByteInteger() {
 		var value = 0;
 		var multiplier = 1;
@@ -129,7 +136,7 @@ class ConnectPropertiesReader extends Reader {
 		var p = {};
 		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case ConnectPropertyId.SessionExpiryInterval:
@@ -165,8 +172,9 @@ class ConnectPropertiesReader extends Reader {
 class WillPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case WillPropertyId.PayloadFormatIndicator:
@@ -182,7 +190,7 @@ class WillPropertiesReader extends Reader {
 					case WillPropertyId.WillDelayInterval:
 						Reflect.setField(p, "willDelayInterval", readInt32());
 					case WillPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid will property id ${propertyId}.');
 				}
@@ -190,7 +198,7 @@ class WillPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -246,8 +254,9 @@ class ConnectReader extends Reader {
 class ConnackPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case ConnackPropertyId.SessionExpiryInterval:
@@ -275,7 +284,8 @@ class ConnackPropertiesReader extends Reader {
 					case ConnackPropertyId.RetainAvailable:
 						Reflect.setField(p, "retainAvailable", readByte());
 					case ConnackPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
+
 					case ConnackPropertyId.MaximumPacketSize:
 						Reflect.setField(p, "maximumPacketSize", readInt32());
 					case ConnackPropertyId.WildcardSubscriptionAvailable:
@@ -291,7 +301,7 @@ class ConnackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -316,8 +326,9 @@ class ConnackReader extends Reader {
 class PublishPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PublishPropertyId.PayloadFormatIndicator:
@@ -335,7 +346,8 @@ class PublishPropertiesReader extends Reader {
 					case PublishPropertyId.TopicAlias:
 						Reflect.setField(p, "topicAlias", readUInt16());
 					case PublishPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
+
 					default:
 						throw new MqttReaderException('Invalid publish property id ${propertyId}.');
 				}
@@ -343,6 +355,7 @@ class PublishPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -365,14 +378,16 @@ class PublishReader extends Reader {
 class PubackPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubackPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case PubackPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
+
 					default:
 						throw new MqttReaderException('Invalid puback property id ${propertyId}.');
 				}
@@ -380,6 +395,7 @@ class PubackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -404,14 +420,15 @@ class PubackReader extends Reader {
 class PubrecPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubrecPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case PubrecPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid puback property id ${propertyId}.');
 				}
@@ -419,6 +436,7 @@ class PubrecPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -432,14 +450,16 @@ class PubrecReader extends Reader {
 class PubrelPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubrelPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case PubrelPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
+
 					default:
 						throw new MqttReaderException('Invalid puback property id ${propertyId}.');
 				}
@@ -447,6 +467,7 @@ class PubrelPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -460,14 +481,15 @@ class PubrelReader extends Reader {
 class PubcompPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubcompPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case PubcompPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid pubcomp property id ${propertyId}.');
 				}
@@ -475,6 +497,7 @@ class PubcompPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -488,14 +511,15 @@ class PubcompReader extends Reader {
 class SubscribePropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case SubscribePropertyId.SubscriptionIdentifier:
 						Reflect.setField(p, "subscriptionIdentifier", readVariableByteInteger());
 					case SubscribePropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid subscribe property id ${propertyId}.');
 				}
@@ -503,6 +527,7 @@ class SubscribePropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -519,14 +544,15 @@ class SubscribeReader extends Reader {
 class SubackPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case SubackPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case SubackPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid suback property id ${propertyId}.');
 				}
@@ -534,6 +560,7 @@ class SubackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -547,12 +574,13 @@ class SubackReader extends Reader {
 class UnsubscribePropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case UnsubscribePropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid unsubscribe property id ${propertyId}.');
 				}
@@ -560,6 +588,7 @@ class UnsubscribePropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -573,14 +602,15 @@ class UnsubscribeReader extends Reader {
 class UnsubackPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case UnsubackPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case UnsubackPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid unsuback property id ${propertyId}.');
 				}
@@ -588,6 +618,7 @@ class UnsubackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -601,8 +632,9 @@ class UnsubackReader extends Reader {
 class AuthPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case AuthPropertyId.SessionExpiryInterval:
@@ -612,7 +644,8 @@ class AuthPropertiesReader extends Reader {
 					case AuthPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case AuthPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
+
 					default:
 						throw new MqttReaderException('Invalid auth property id ${propertyId}.');
 				}
@@ -620,6 +653,7 @@ class AuthPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -633,8 +667,9 @@ class AuthReader extends Reader {
 class DisconnectPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
-			while (true) {
+			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case DisconnectPropertyId.AuthenticationMethod:
@@ -644,7 +679,7 @@ class DisconnectPropertiesReader extends Reader {
 					case DisconnectPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case DisconnectPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					default:
 						throw new MqttReaderException('Invalid disconnect property id ${propertyId}.');
 				}
@@ -652,6 +687,7 @@ class DisconnectPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
