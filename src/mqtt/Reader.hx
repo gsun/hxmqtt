@@ -1,6 +1,8 @@
 package mqtt;
+
 import mqtt.Constants;
 import mqtt.Data;
+import mqtt.AbstractEnumTools;
 
 class Reader {
 	var i:haxe.io.Input;
@@ -51,8 +53,9 @@ class Reader {
 	function readVariableByteInteger() {
 		var value = 0;
 		var multiplier = 1;
+		var byte;
 		do {
-			var byte = i.readByte();
+			byte = i.readByte();
 			value += ((byte & 127) * multiplier);
 			if (multiplier > 2097152)
 				throw new MqttReaderException('Invalid variable Byte Integer.');
@@ -72,7 +75,13 @@ class Reader {
 
 		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(remainingLength));
 		var reader = Type.createInstance(cl, [bi]);
-		return reader.read();
+		var bo = {};
+		try {
+			bo = reader.read();
+		} catch (e:haxe.io.Eof) {} catch (e) {
+			trace(e);
+		}
+		return bo;
 	}
 
 	function readProperties(pc:PropertyKind) {
@@ -86,7 +95,13 @@ class Reader {
 
 		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
 		var reader = Type.createInstance(cl, [bi]);
-		return reader.read();
+		var bo = {};
+		try {
+			bo = reader.read();
+		} catch (e:haxe.io.Eof) {} catch (e) {
+			trace(e);
+		}
+		return bo;
 	}
 
 	public function read():Dynamic {
@@ -94,9 +109,9 @@ class Reader {
 		var dup = bits.readBit();
 		var qos = bits.readBits(2);
 		var retain = bits.readBit();
-		if (pktType <= CtrlPktType.Reserved || pktType > CtrlPktType.Auth)
+		if (pktType <= cast(CtrlPktType.Reserved, Int) || pktType > cast(CtrlPktType.Auth, Int))
 			throw new MqttReaderException('invalid packet type ${pktType}');
-		if (qos < Qos.AtMostOnce || qos > Qos.ExactlyOnce)
+		if (qos < cast(QoS.AtMostOnce, Int) || qos > cast(QoS.ExactlyOnce, Int))
 			throw new MqttReaderException('invalid Qos ${qos}');
 		var body = readBody(pktType);
 		return {
@@ -112,7 +127,7 @@ class Reader {
 class ConnectPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case ConnectPropertyId.SessionExpiryInterval:
@@ -144,7 +159,8 @@ class ConnectPropertiesReader extends Reader {
 class WillPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case WillPropertyId.PayloadFormatIndicator:
@@ -165,6 +181,7 @@ class WillPropertiesReader extends Reader {
 					throw new MqttReaderException('Invalid will property id ${propertyId}.');
 			}
 		}
+
 		return p;
 	}
 }
@@ -216,7 +233,8 @@ class ConnectReader extends Reader {
 class ConnackPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case ConnackPropertyId.SessionExpiryInterval:
@@ -257,6 +275,7 @@ class ConnackPropertiesReader extends Reader {
 					throw new MqttReaderException('Invalid connack property id ${propertyId}.');
 			}
 		}
+
 		return p;
 	}
 }
@@ -266,7 +285,8 @@ class ConnackReader extends Reader {
 		bits.readBits(7);
 		var sessionPresent = bits.readBit();
 		var reasonCode = readByte();
-		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
+		var ea = AbstractEnumTools.getValues(ConnackReasonCode);
+		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
 		var properties = readProperties(PropertyKind.Connack);
 		return {
@@ -280,7 +300,7 @@ class ConnackReader extends Reader {
 class PublishPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case PublishPropertyId.PayloadFormatIndicator:
@@ -325,7 +345,7 @@ class PublishReader extends Reader {
 class PubackPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case PubackPropertyId.ReasonString:
@@ -345,7 +365,8 @@ class PubackReader extends Reader {
 		bits.readBits(7);
 		var sessionPresent = bits.readBit();
 		var reasonCode = readByte();
-		if (!Type.allEnums(ConnackReasonCode).contains(reasonCode))
+		var ea = AbstractEnumTools.getValues(PubackReasonCode);
+		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
 		var properties = readProperties(PropertyKind.Puback);
 		return {
@@ -359,7 +380,7 @@ class PubackReader extends Reader {
 class PubrecPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case PubrecPropertyId.ReasonString:
@@ -383,7 +404,7 @@ class PubrecReader extends Reader {
 class PubrelPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case PubrelPropertyId.ReasonString:
@@ -407,7 +428,7 @@ class PubrelReader extends Reader {
 class PubcompPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case PubcompPropertyId.ReasonString:
@@ -431,7 +452,7 @@ class PubcompReader extends Reader {
 class SubscribePropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case SubscribePropertyId.SubscriptionIdentifier:
@@ -449,7 +470,7 @@ class SubscribePropertiesReader extends Reader {
 class SubscribeReader extends Reader {
 	override public function read():Dynamic {
 		var packetIdentifier = readUInt16();
-		var properties = readSubackProperties(PropertyKind.Subscribe);
+		var properties = readProperties(PropertyKind.Subscribe);
 		var subscriptions:Array<Subscription> = [];
 		return {};
 	}
@@ -458,7 +479,7 @@ class SubscribeReader extends Reader {
 class SubackPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case SubackPropertyId.ReasonString:
@@ -482,7 +503,7 @@ class SubackReader extends Reader {
 class UnsubscribePropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case UnsubscribePropertyId.UserProperty:
@@ -504,7 +525,7 @@ class UnsubscribeReader extends Reader {
 class UnsubackPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case UnsubackPropertyId.ReasonString:
@@ -528,7 +549,7 @@ class UnsubackReader extends Reader {
 class AuthPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case AuthPropertyId.SessionExpiryInterval:
@@ -556,7 +577,7 @@ class AuthReader extends Reader {
 class DisconnectPropertiesReader extends Reader {
 	override public function read():Dynamic {
 		var p = {};
-		while (i.pos < i.buf.length) {
+		while (true) {
 			var propertyId = readVariableByteInteger();
 			switch (propertyId) {
 				case DisconnectPropertyId.AuthenticationMethod:

@@ -12,8 +12,8 @@ class Test {
 }
 
 class SimpleTest extends utest.Test {
-	//test case from mqtt-packet, https://github.com/mqttjs/mqtt-packet/
-	public function testVoid() { 
+	// test case from mqtt-packet, https://github.com/mqttjs/mqtt-packet/
+	public function testVoid() {
 		var p1 = [
 			16, 125, // Header
 			0, 4, // Protocol ID length
@@ -51,16 +51,15 @@ class SimpleTest extends utest.Test {
 			116, 111, 112, 105, 99, // Will topic
 			0, 4, // Will payload length
 			4, 3, 2, 1, // Will payload
-			0 //padding
+			0 // padding
 		];
 		Assert.equals(p1.length, 128);
 		var p2 = [for (i in p1) StringTools.hex(i)].join("");
-		Assert.equals(p2, "107D044D51545453601E2F11004D2211B02700064221C819117126047465737404746573741504746573741604123404746573742F18004D21020010E130474657374805746F7069639041234260474657374047465737405746F7069630443210");
+		Assert.equals(p2,
+			"107D044D51545453601E2F11004D2211B02700064221C819117126047465737404746573741504746573741604123404746573742F18004D21020010E130474657374805746F7069639041234260474657374047465737405746F7069630443210");
 		var p3 = Bytes.ofHex(p2);
 		Assert.equals(p2, p3.toHex().toUpperCase());
-		
-		//var r = new Reader(new haxe.io.BytesInput(p3));
-		
-		
+
+		var r = new Reader(new haxe.io.BytesInput(p3));
 	}
 }
