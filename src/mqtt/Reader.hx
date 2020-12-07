@@ -127,6 +127,7 @@ class Reader {
 class ConnectPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
+		var u = {};
 		try {
 			while (true) {
 				var propertyId = readVariableByteInteger();
@@ -146,7 +147,7 @@ class ConnectPropertiesReader extends Reader {
 					case ConnectPropertyId.TopicAliasMaximum:
 						Reflect.setField(p, "topicAliasMaximum", readUInt16());
 					case ConnectPropertyId.UserProperty:
-						Reflect.setField(p, "userProperty", readString());
+						Reflect.setField(u, readString(), readString());
 					case ConnectPropertyId.MaximumPacketSize:
 						Reflect.setField(p, "maximumPacketSize", readInt32());
 					default:
@@ -156,6 +157,7 @@ class ConnectPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
+		Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }

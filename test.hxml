@@ -6,4 +6,10 @@
 -neko mqtt.n
 
 --next
---cmd neko mqtt.n
+-cp src
+-cp test
+-main Test
+-lib utest
+-lib format
+-lib hxnodejs
+-js mqtt.js
