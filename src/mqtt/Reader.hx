@@ -29,24 +29,29 @@ class Reader {
 	}
 
 	inline function readString() {
+		if (eof()) throw new MqttReaderException('eof');
 		var size = i.readUInt16();
 		return i.readString(size, UTF8);
 	}
 
 	inline function readBinary() {
+		if (eof()) throw new MqttReaderException('eof');
 		var size = i.readUInt16();
 		return i.read(size);
 	}
 
 	inline function readByte() {
+		if (eof()) throw new MqttReaderException('eof');
 		return i.readByte();
 	}
 
 	inline function readUInt16() {
+		if (eof()) throw new MqttReaderException('eof');
 		return i.readUInt16();
 	}
 
 	inline function readInt32() {
+		if (eof()) throw new MqttReaderException('eof');
 		return i.readInt32();
 	}
 
