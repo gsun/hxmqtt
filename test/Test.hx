@@ -16,31 +16,46 @@ class Test {
 class ConnectTest extends utest.Test {
 	public function testMin() {
 		var p1 = [
-			16, 16, // Header
+			16, 17, // Header
 			0, 4, // Protocol ID length
 			77, 81, 84, 84, // Protocol ID
-			3, // Protocol version
+			5, // Protocol version
 			0, // Connect flags
 			0, 30, // Keepalive
-			0,
+			0, 0,
 			4, // Client ID length
 			116, 101, 115, 116 // Client ID
 		];
-		Assert.equals(p1.length, 18);
+		Assert.equals(p1.length, 19);
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		Assert.equals(p2, "101000044D5154540300001E000474657374");
+		Assert.equals(p2, "101100044D5154540500001E00000474657374");
 		var p3 = Bytes.ofHex(p2);
 		Assert.equals(p2, p3.toHex().toUpperCase());
 
 		var r = new Reader(new haxe.io.BytesInput(p3));
 		var p = r.read();
-
 		Assert.same({
 			pktType: 1,
 			dup: false,
 			qos: 0,
 			retain: false,
-			body: {}
+			body: {
+				clientId: "test",
+				protocolVersion: 5,
+				protocolName: "MQTT",
+				cleanStart: false,
+				keepalive: 30,
+				username: null,
+				password: null,
+				will: {
+					topic: null,
+					payload: null,
+					qos: 0,
+					retain: false,
+					properties: null
+				},
+				properties: null
+			}
 		}, p);
 	}
 
@@ -86,8 +101,6 @@ class ConnectTest extends utest.Test {
 		];
 		Assert.equals(p1.length, 127);
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		Assert.equals(p2,
-			"107D00044D5154540536001E2F11000004D22101B027000000642201C8190117012600047465737400047465737415000474657374160004010203040004746573742F18000004D2010002000010E103000474657374080005746F70696309000401020304260004746573740004746573740005746F706963000404030201");
 		var p3 = Bytes.ofHex(p2);
 		Assert.equals(p2, p3.toHex().toUpperCase());
 
