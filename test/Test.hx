@@ -9,7 +9,7 @@ import mqtt.*;
 
 class Test {
 	public static function main() {
-		utest.UTest.run([new ConnectTest()]);
+		utest.UTest.run([new ConnectTest(), new ConnackTest()]);
 	}
 }
 
@@ -342,6 +342,72 @@ class ConnectTest extends utest.Test {
 			qos: 0,
 			retain: false,
 			body: {}
+		}, p);
+	}
+}
+
+class ConnackTest extends utest.Test {
+	public function testProperties() {
+		var p1 = [
+			32, 87, 0, 0, 84, // properties length
+			17, 0, 0, 4, 210, // sessionExpiryInterval
+			33, 1, 176, // receiveMaximum
+			36, 2, // Maximum qos
+			37,
+			1, // retainAvailable
+			39, 0, 0, 0, 100, // maximumPacketSize
+			18, 0, 4, 116, 101, 115, 116, // assignedClientIdentifier
+			34, 1,
+			200, // topicAliasMaximum
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			40,
+			1, // wildcardSubscriptionAvailable
+			41, 1, // subscriptionIdentifiersAvailable
+			42, 0, // sharedSubscriptionAvailable
+			19, 4, 210, // serverKeepAlive
+			26, 0, 4, 116, 101, 115, 116, // responseInformation
+			28, 0, 4, 116, 101, 115, 116, // serverReference
+			21, 0, 4, 116, 101, 115,
+			116, // authenticationMethod
+			22, 0, 4, 1, 2, 3, 4 // authenticationData
+		];
+		Assert.equals(p1.length, 89);
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 2,
+			dup: false,
+			qos: 0,
+			retain: false,
+			body: {
+				reasonCode: 0,
+				sessionPresent: false,
+				properties: {
+					sessionExpiryInterval: 1234,
+					receiveMaximum: 432,
+					maximumQoS: 2,
+					retainAvailable: 1,
+					maximumPacketSize: 100,
+					assignedClientIdentifier: "test",
+					topicAliasMaximum: 456,
+					reasonString: "test",
+					wildcardSubscriptionAvailable: 1,
+					subscriptionIdentifierAvailable: 1,
+					sharedSubscriptionAvailabe: 0,
+					serverKeepAlive: 1234,
+					responseInformation: "test",
+					serverReference: "test",
+					authenticationMethod: "test",
+					authenticationData: Bytes.ofHex("01020304"),
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
 		}, p);
 	}
 }
