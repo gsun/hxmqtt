@@ -539,9 +539,7 @@ class PublishTest extends utest.Test {
 			body: {
 				topic: "test",
 				packetIdentifier: 29797,
-				properties: {
-					userProperty: {}
-				},
+				properties: {},
 				payload: Bytes.ofString("")
 			}
 		}, p);
@@ -682,7 +680,6 @@ class PublishTest extends utest.Test {
 				packetIdentifier: 10,
 				properties: {
 					payloadFormatIndicator: 0,
-					userProperty: {},
 					subscriptionIdentifier: [128, 16384, 2097152]
 				},
 				payload: Bytes.ofString("test")
@@ -718,7 +715,6 @@ class PublishTest extends utest.Test {
 				packetIdentifier: 10,
 				properties: {
 					payloadFormatIndicator: 0,
-					userProperty: {},
 					subscriptionIdentifier: [1, 268435455]
 				},
 				payload: Bytes.ofString("test")

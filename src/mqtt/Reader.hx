@@ -174,7 +174,8 @@ class ConnectPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -208,7 +209,8 @@ class WillPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -291,7 +293,6 @@ class ConnackPropertiesReader extends Reader {
 						Reflect.setField(p, "retainAvailable", readByte());
 					case ConnackPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
-
 					case ConnackPropertyId.MaximumPacketSize:
 						Reflect.setField(p, "maximumPacketSize", readInt32());
 					case ConnackPropertyId.WildcardSubscriptionAvailable:
@@ -307,7 +308,8 @@ class ConnackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -362,7 +364,8 @@ class PublishPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		if (i.length > 0)
 			Reflect.setField(p, "subscriptionIdentifier", i);
 		return p;
@@ -404,7 +407,8 @@ class PubackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -445,7 +449,8 @@ class PubrecPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -476,7 +481,8 @@ class PubrelPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -506,7 +512,8 @@ class PubcompPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -536,7 +543,8 @@ class SubscribePropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -569,7 +577,8 @@ class SubackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -597,7 +606,8 @@ class UnsubscribePropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -627,7 +637,8 @@ class UnsubackPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -662,7 +673,8 @@ class AuthPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
@@ -696,7 +708,8 @@ class DisconnectPropertiesReader extends Reader {
 		} catch (e) {
 			trace(e);
 		}
-		Reflect.setField(p, "userProperty", u);
+		if (Reflect.fields(u).length > 0)
+			Reflect.setField(p, "userProperty", u);
 		return p;
 	}
 }
