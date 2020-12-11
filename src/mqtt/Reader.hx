@@ -333,6 +333,7 @@ class PublishPropertiesReader extends Reader {
 	override function read():Dynamic {
 		var p = {};
 		var u = {};
+		var i = new Array<Int>();
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
@@ -348,7 +349,7 @@ class PublishPropertiesReader extends Reader {
 					case PublishPropertyId.CorrelationData:
 						Reflect.setField(p, "correlationData", readBinary());
 					case PublishPropertyId.SubscriptionIdentifier:
-						Reflect.setField(p, "subscriptionIdentifier", readVariableByteInteger());
+						i.push(readVariableByteInteger());
 					case PublishPropertyId.TopicAlias:
 						Reflect.setField(p, "topicAlias", readUInt16());
 					case PublishPropertyId.UserProperty:
@@ -362,6 +363,8 @@ class PublishPropertiesReader extends Reader {
 			trace(e);
 		}
 		Reflect.setField(p, "userProperty", u);
+		if (i.length > 0)
+			Reflect.setField(p, "subscriptionIdentifier", i);
 		return p;
 	}
 }

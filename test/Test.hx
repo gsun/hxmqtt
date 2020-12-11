@@ -586,13 +586,140 @@ class PublishTest extends utest.Test {
 					topicAlias: 100,
 					responseTopic: "topic",
 					correlationData: Bytes.ofHex("01020304"),
-					subscriptionIdentifier: 120,
+					subscriptionIdentifier: [120],
 					contentType: "test",
 					userProperty: {
 						test: "test"
 					}
 				},
 				payload: Bytes.ofString('test')
+			}
+		}, p);
+	}
+
+	public function testMultiSubscriptionIdentifier() {
+		var p1 = [
+			61, 64, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			0, 10, // Message ID
+			51, // properties length
+			1,
+			1, // payloadFormatIndicator
+			2, 0, 0, 16, 225, // message expiry interval
+			35, 0, 100, // topicAlias
+			8, 0, 5, 116, 111, 112, 105, 99, // response topic
+			9, 0, 4, 1, 2, 3, 4, // correlationData
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			11, 120, // subscriptionIdentifier
+			11, 121, // subscriptionIdentifier
+			11, 122, // subscriptionIdentifier
+			3, 0, 4, 116, 101, 115, 116, // content type
+			116, 101, 115,
+			116 // Payload (test)
+		];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 3,
+			dup: true,
+			qos: 2,
+			retain: true,
+			body: {
+				topic: "test",
+				packetIdentifier: 10,
+				properties: {
+					payloadFormatIndicator: 1,
+					messageExpiryInterval: 4321,
+					topicAlias: 100,
+					responseTopic: "topic",
+					correlationData: Bytes.ofHex("01020304"),
+					subscriptionIdentifier: [120, 121, 122],
+					contentType: "test",
+					userProperty: {
+						test: "test"
+					}
+				},
+				payload: Bytes.ofString('test')
+			}
+		}, p);
+	}
+
+	public function testVariableSubscriptionIdentifier() {
+		var p1 = [
+			61, 27, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			0, 10, // Message ID
+			14, // properties length
+			1,
+			0, // payloadFormatIndicator
+			11, 128, 1, // subscriptionIdentifier
+			11, 128, 128, 1, // subscriptionIdentifier
+			11, 128, 128, 128,
+			1, // subscriptionIdentifier
+			116, 101, 115, 116 // Payload (test)
+		];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 3,
+			dup: true,
+			qos: 2,
+			retain: true,
+			body: {
+				topic: "test",
+				packetIdentifier: 10,
+				properties: {
+					payloadFormatIndicator: 0,
+					userProperty: {},
+					subscriptionIdentifier: [128, 16384, 2097152]
+				},
+				payload: Bytes.ofString("test")
+			}
+		}, p);
+	}
+
+	public function testMaxSubscriptionIdentifier() {
+		var p1 = [
+			61, 22, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			0, 10, // Message ID
+			9, // properties length
+			1, 0, // payloadFormatIndicator
+			11, 1, // subscriptionIdentifier
+			11, 255, 255, 255, 127, // subscriptionIdentifier (max value)
+			116, 101, 115, 116 // Payload (test)
+		];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: 3,
+			dup: true,
+			qos: 2,
+			retain: true,
+			body: {
+				topic: "test",
+				packetIdentifier: 10,
+				properties: {
+					payloadFormatIndicator: 0,
+					userProperty: {},
+					subscriptionIdentifier: [1, 268435455]
+				},
+				payload: Bytes.ofString("test")
 			}
 		}, p);
 	}

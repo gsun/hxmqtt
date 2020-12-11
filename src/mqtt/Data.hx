@@ -61,7 +61,7 @@ typedef PublishProperties = {
 	@:optional var responseTopic:String;
 	@:optional var correlationData:Bytes;
 	@:optional var userProperties:Dynamic;
-	@:optional var subscriptionIdentifier:Int;
+	@:optional var subscriptionIdentifier:Array<Int>;
 	@:optional var contentType:String;
 }
 
