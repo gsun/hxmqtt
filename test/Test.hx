@@ -3,7 +3,9 @@ import utest.ui.Report;
 import utest.Assert;
 import haxe.io.Bytes;
 import haxe.crypto.BaseCode;
-import mqtt.*;
+import mqtt.Constants;
+import mqtt.Reader;
+import mqtt.Data;
 
 // test case from mqtt-packet, https://github.com/mqttjs/mqtt-packet/
 
@@ -35,9 +37,9 @@ class ConnectTest extends utest.Test {
 		var r = new Reader(new haxe.io.BytesInput(p3));
 		var p = r.read();
 		Assert.same({
-			pktType: 1,
+			pktType: CtrlPktType.Connect,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				clientId: "test",
@@ -108,9 +110,9 @@ class ConnectTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 1,
+			pktType: CtrlPktType.Connect,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				clientId: "test",
@@ -200,9 +202,9 @@ class ConnectTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 1,
+			pktType: CtrlPktType.Connect,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				clientId: "test",
@@ -283,9 +285,9 @@ class ConnectTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 1,
+			pktType: CtrlPktType.Connect,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				clientId: "test",
@@ -337,9 +339,9 @@ class ConnectTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 1,
+			pktType: CtrlPktType.Connect,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {}
 		}, p);
@@ -379,9 +381,9 @@ class ConnackTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 2,
+			pktType: CtrlPktType.Connack,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				reasonCode: 0,
@@ -444,9 +446,9 @@ class ConnackTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 2,
+			pktType: CtrlPktType.Connack,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				reasonCode: 0,
@@ -485,9 +487,9 @@ class ConnackTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 2,
+			pktType: CtrlPktType.Connack,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				reasonCode: 0,
@@ -506,9 +508,9 @@ class ConnackTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 2,
+			pktType: CtrlPktType.Connack,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {}
 		}, p);
@@ -530,9 +532,9 @@ class PublishTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 3,
+			pktType: CtrlPktType.Publish,
 			dup: false,
-			qos: 0,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				topic: "test",
@@ -573,9 +575,9 @@ class PublishTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 3,
+			pktType: CtrlPktType.Publish,
 			dup: true,
-			qos: 2,
+			qos: QoS.ExactlyOnce,
 			retain: true,
 			body: {
 				topic: "test",
@@ -625,9 +627,9 @@ class PublishTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 3,
+			pktType: CtrlPktType.Publish,
 			dup: true,
-			qos: 2,
+			qos: QoS.ExactlyOnce,
 			retain: true,
 			body: {
 				topic: "test",
@@ -671,9 +673,9 @@ class PublishTest extends utest.Test {
 		var p = r.read();
 
 		Assert.same({
-			pktType: 3,
+			pktType: CtrlPktType.Publish,
 			dup: true,
-			qos: 2,
+			qos: QoS.ExactlyOnce,
 			retain: true,
 			body: {
 				topic: "test",
@@ -707,9 +709,9 @@ class PublishTest extends utest.Test {
 		var p = r.read();
 		trace(p);
 		Assert.same({
-			pktType: 3,
+			pktType: CtrlPktType.Publish,
 			dup: true,
-			qos: 2,
+			qos: QoS.ExactlyOnce,
 			retain: true,
 			body: {
 				topic: "test",
