@@ -9,7 +9,7 @@ import mqtt.*;
 
 class Test {
 	public static function main() {
-		utest.UTest.run([new ConnectTest(), new ConnackTest()]);
+		utest.UTest.run([new ConnectTest(), new ConnackTest(), new PublishTest()]);
 	}
 }
 
@@ -26,7 +26,7 @@ class ConnectTest extends utest.Test {
 			4, // Client ID length
 			116, 101, 115, 116 // Client ID
 		];
-		Assert.equals(p1.length, 19);
+
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
 		Assert.equals(p2, "101100044D5154540500001E00000474657374");
 		var p3 = Bytes.ofHex(p2);
@@ -99,7 +99,7 @@ class ConnectTest extends utest.Test {
 			0, 4, // Will payload length
 			4, 3, 2, 1, // Will payload
 		];
-		Assert.equals(p1.length, 127);
+
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
 		var p3 = Bytes.ofHex(p2);
 		Assert.equals(p2, p3.toHex().toUpperCase());
@@ -193,7 +193,7 @@ class ConnectTest extends utest.Test {
 			116, 111, 112, 105, 99, // Will topic
 			0, 0 // Will payload length
 		];
-		Assert.equals(p1.length, 123);
+
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
 		var p3 = Bytes.ofHex(p2);
 		var r = new Reader(new haxe.io.BytesInput(p3));
@@ -276,7 +276,7 @@ class ConnectTest extends utest.Test {
 			4, // Will payload length
 			4, 3, 2, 1 // Will payload
 		];
-		Assert.equals(p1.length, 80);
+
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
 		var p3 = Bytes.ofHex(p2);
 		var r = new Reader(new haxe.io.BytesInput(p3));
@@ -330,7 +330,7 @@ class ConnectTest extends utest.Test {
 			0,
 			0 // Client ID length
 		];
-		Assert.equals(p1.length, 14);
+
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
 		var p3 = Bytes.ofHex(p2);
 		var r = new Reader(new haxe.io.BytesInput(p3));
@@ -372,7 +372,7 @@ class ConnackTest extends utest.Test {
 			116, // authenticationMethod
 			22, 0, 4, 1, 2, 3, 4 // authenticationData
 		];
-		Assert.equals(p1.length, 89);
+
 		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
 		var p3 = Bytes.ofHex(p2);
 		var r = new Reader(new haxe.io.BytesInput(p3));
@@ -407,6 +407,192 @@ class ConnackTest extends utest.Test {
 						test: "test"
 					}
 				}
+			}
+		}, p);
+	}
+
+	public function testMultiUserProperties() {
+		var p1 = [
+			32, 100, 0, 0, 97, // properties length
+			17, 0, 0, 4, 210, // sessionExpiryInterval
+			33, 1, 176, // receiveMaximum
+			36, 2, // Maximum qos
+			37,
+			1, // retainAvailable
+			39, 0, 0, 0, 100, // maximumPacketSize
+			18, 0, 4, 116, 101, 115, 116, // assignedClientIdentifier
+			34, 1,
+			200, // topicAliasMaximum
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, 38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			40, 1, // wildcardSubscriptionAvailable
+			41, 1, // subscriptionIdentifiersAvailable
+			42,
+			0, // sharedSubscriptionAvailable
+			19, 4, 210, // serverKeepAlive
+			26, 0, 4, 116, 101, 115, 116, // responseInformation
+			28, 0, 4, 116, 101, 115,
+			116, // serverReference
+			21, 0, 4, 116, 101, 115, 116, // authenticationMethod
+			22, 0, 4, 1, 2, 3, 4 // authenticationData
+		];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 2,
+			dup: false,
+			qos: 0,
+			retain: false,
+			body: {
+				reasonCode: 0,
+				sessionPresent: false,
+				properties: {
+					sessionExpiryInterval: 1234,
+					receiveMaximum: 432,
+					maximumQoS: 2,
+					retainAvailable: 1,
+					maximumPacketSize: 100,
+					assignedClientIdentifier: "test",
+					topicAliasMaximum: 456,
+					reasonString: "test",
+					wildcardSubscriptionAvailable: 1,
+					subscriptionIdentifierAvailable: 1,
+					sharedSubscriptionAvailabe: 0,
+					serverKeepAlive: 1234,
+					responseInformation: "test",
+					serverReference: "test",
+					authenticationMethod: "test",
+					authenticationData: Bytes.ofHex("01020304"),
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+
+	public function testReturuCode0() {
+		var p1 = [32, 2, 1, 0, 0];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 2,
+			dup: false,
+			qos: 0,
+			retain: false,
+			body: {
+				reasonCode: 0,
+				sessionPresent: true,
+				properties: null
+			}
+		}, p);
+	}
+
+	public function testReturuCode5() {
+		var p1 = [32, 2, 1, 5, 0];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 2,
+			dup: false,
+			qos: 0,
+			retain: false,
+			body: {}
+		}, p);
+	}
+}
+
+class PublishTest extends utest.Test {
+	public function testMin() {
+		var p1 = [
+			48, 10, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			116, 101, 115, 116 // Payload (test)
+		];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 3,
+			dup: false,
+			qos: 0,
+			retain: false,
+			body: {
+				topic: "test",
+				packetIdentifier: 29797,
+				properties: {
+					userProperty: {}
+				},
+				payload: Bytes.ofString("")
+			}
+		}, p);
+	}
+
+	public function testV5() {
+		var p1 = [
+			61, 86, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			0, 10, // Message ID
+			73, // properties length
+			1,
+			1, // payloadFormatIndicator
+			2, 0, 0, 16, 225, // message expiry interval
+			35, 0, 100, // topicAlias
+			8, 0, 5, 116, 111, 112, 105, 99, // response topic
+			9, 0, 4, 1, 2, 3, 4, // correlationData
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			38, 0, 4, 116, 101, 115, 116, 0,
+			4, 116, 101, 115, 116, // userProperties
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			11, 120, // subscriptionIdentifier
+			3, 0, 4, 116, 101, 115, 116, // content type
+			116, 101, 115, 116 // Payload (test)
+		];
+
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+
+		Assert.same({
+			pktType: 3,
+			dup: true,
+			qos: 2,
+			retain: true,
+			body: {
+				topic: "test",
+				packetIdentifier: 10,
+				properties: {
+					payloadFormatIndicator: 1,
+					messageExpiryInterval: 4321,
+					topicAlias: 100,
+					responseTopic: "topic",
+					correlationData: Bytes.ofHex("01020304"),
+					subscriptionIdentifier: 120,
+					contentType: "test",
+					userProperty: {
+						test: "test"
+					}
+				},
+				payload: Bytes.ofString('test')
 			}
 		}, p);
 	}
