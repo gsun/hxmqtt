@@ -704,7 +704,7 @@ class PublishTest extends utest.Test {
 		var p3 = Bytes.ofHex(p2);
 		var r = new Reader(new haxe.io.BytesInput(p3));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Publish,
 			dup: true,
@@ -718,6 +718,49 @@ class PublishTest extends utest.Test {
 					subscriptionIdentifier: [1, 268435455]
 				},
 				payload: Bytes.ofString("test")
+			}
+		}, p);
+	}
+
+	public function test2kPayload() {
+		var p1 = [
+			61, 146, 16, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			0, 10, // Message ID
+			9, // properties length
+			1,
+			0, // payloadFormatIndicator
+			11, 1, // subscriptionIdentifier
+			11, 255, 255, 255, 127, // subscriptionIdentifier (max value)
+		];
+
+		var a1 = new Array();
+		for (i in 0...2048)
+			a1.push(3);
+		var a2 = [for (i in a1) StringTools.hex(i, 2)].join("");
+		var a3 = Bytes.ofHex(a2);
+
+		p1 = p1.concat(a1);
+		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
+		var p3 = Bytes.ofHex(p2);
+		var r = new Reader(new haxe.io.BytesInput(p3));
+		var p = r.read();
+		trace(p);
+
+		Assert.same({
+			pktType: CtrlPktType.Publish,
+			dup: true,
+			qos: QoS.ExactlyOnce,
+			retain: true,
+			body: {
+				topic: "test",
+				packetIdentifier: 10,
+				properties: {
+					payloadFormatIndicator: 0,
+					subscriptionIdentifier: [1, 268435455]
+				},
+				payload: a3
 			}
 		}, p);
 	}
