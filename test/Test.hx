@@ -759,19 +759,15 @@ class PublishTest extends utest.Test {
 			11, 255, 255, 255, 127, // subscriptionIdentifier (max value)
 		];
 
-		var p2 = new Array();
-		for (i in 0...2048)
-			p2.push(3);
-
-		p1 = p1.concat(p2);
-
 		var bb1 = new BytesBuffer();
 		for (i in p1)
 			bb1.addByte(i);
+		for (i in 0...2048)
+			bb1.addByte(3);
 
 		var bb2 = new BytesBuffer();
-		for (i in p2)
-			bb2.addByte(i);
+		for (i in 0...2048)
+			bb2.addByte(3);
 
 		var r = new Reader(new haxe.io.BytesInput(bb1.getBytes()));
 		var p = r.read();
