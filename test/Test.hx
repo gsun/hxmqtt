@@ -2,6 +2,7 @@ import utest.Runner;
 import utest.ui.Report;
 import utest.Assert;
 import haxe.io.Bytes;
+import haxe.io.BytesBuffer;
 import haxe.crypto.BaseCode;
 import mqtt.Constants;
 import mqtt.Reader;
@@ -29,12 +30,11 @@ class ConnectTest extends utest.Test {
 			116, 101, 115, 116 // Client ID
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		Assert.equals(p2, "101100044D5154540500001E00000474657374");
-		var p3 = Bytes.ofHex(p2);
-		Assert.equals(p2, p3.toHex().toUpperCase());
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
 
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 		Assert.same({
 			pktType: CtrlPktType.Connect,
@@ -102,11 +102,11 @@ class ConnectTest extends utest.Test {
 			4, 3, 2, 1, // Will payload
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		Assert.equals(p2, p3.toHex().toUpperCase());
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
 
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -196,9 +196,11 @@ class ConnectTest extends utest.Test {
 			0, 0 // Will payload length
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -279,9 +281,11 @@ class ConnectTest extends utest.Test {
 			4, 3, 2, 1 // Will payload
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -333,9 +337,11 @@ class ConnectTest extends utest.Test {
 			0 // Client ID length
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -375,9 +381,11 @@ class ConnackTest extends utest.Test {
 			22, 0, 4, 1, 2, 3, 4 // authenticationData
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -440,9 +448,11 @@ class ConnackTest extends utest.Test {
 			22, 0, 4, 1, 2, 3, 4 // authenticationData
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -481,9 +491,11 @@ class ConnackTest extends utest.Test {
 	public function testReturuCode0() {
 		var p1 = [32, 2, 1, 0, 0];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -502,9 +514,11 @@ class ConnackTest extends utest.Test {
 	public function testReturuCode5() {
 		var p1 = [32, 2, 1, 5, 0];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -526,9 +540,11 @@ class PublishTest extends utest.Test {
 			116, 101, 115, 116 // Payload (test)
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -567,9 +583,11 @@ class PublishTest extends utest.Test {
 			116, 101, 115, 116 // Payload (test)
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -619,9 +637,11 @@ class PublishTest extends utest.Test {
 			116 // Payload (test)
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -665,9 +685,11 @@ class PublishTest extends utest.Test {
 			116, 101, 115, 116 // Payload (test)
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -700,9 +722,11 @@ class PublishTest extends utest.Test {
 			116, 101, 115, 116 // Payload (test)
 		];
 
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
 
 		Assert.same({
@@ -735,16 +759,21 @@ class PublishTest extends utest.Test {
 			11, 255, 255, 255, 127, // subscriptionIdentifier (max value)
 		];
 
-		var a1 = new Array();
+		var p2 = new Array();
 		for (i in 0...2048)
-			a1.push(3);
-		var a2 = [for (i in a1) StringTools.hex(i, 2)].join("");
-		var a3 = Bytes.ofHex(a2);
+			p2.push(3);
 
-		p1 = p1.concat(a1);
-		var p2 = [for (i in p1) StringTools.hex(i, 2)].join("");
-		var p3 = Bytes.ofHex(p2);
-		var r = new Reader(new haxe.io.BytesInput(p3));
+		p1 = p1.concat(p2);
+
+		var bb1 = new BytesBuffer();
+		for (i in p1)
+			bb1.addByte(i);
+
+		var bb2 = new BytesBuffer();
+		for (i in p2)
+			bb2.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb1.getBytes()));
 		var p = r.read();
 		trace(p);
 
@@ -760,7 +789,7 @@ class PublishTest extends utest.Test {
 					payloadFormatIndicator: 0,
 					subscriptionIdentifier: [1, 268435455]
 				},
-				payload: a3
+				payload: bb2.getBytes()
 			}
 		}, p);
 	}
