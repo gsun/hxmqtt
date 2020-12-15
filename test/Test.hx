@@ -12,7 +12,14 @@ import mqtt.Data;
 
 class Test {
 	public static function main() {
-		utest.UTest.run([new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest()]);
+		utest.UTest.run([
+			new ConnectTest(),
+			new ConnackTest(),
+			new PublishTest(),
+			new PubackTest(),
+			new PubrecTest(),
+			new PubrelTest()
+		]);
 	}
 }
 
@@ -817,6 +824,82 @@ class PubackTest extends utest.Test {
 			body: {
 				packetIdentifier: 2,
 				reasonCode: 16,
+				properties: {
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+}
+
+class PubrecTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			80, 24, // Header
+			0, 2, // Message ID
+			16, // reason code
+			20, // properties length
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Pubrec,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 2,
+				reasonCode: 16,
+				properties: {
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+}
+
+class PubrelTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			98, 24, // Header
+			0, 2, // Message ID
+			146, // reason code
+			20, // properties length
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Pubrel,
+			dup: false,
+			qos: QoS.AtLeastOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 2,
+				reasonCode: 146,
 				properties: {
 					reasonString: "test",
 					userProperty: {

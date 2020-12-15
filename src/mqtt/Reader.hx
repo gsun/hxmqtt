@@ -456,7 +456,17 @@ class PubrecPropertiesReader extends Reader {
 
 class PubrecReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var packetIdentifier = readUInt16();
+		var reasonCode = readByte();
+		var ea = AbstractEnumTools.getValues(PubrecReasonCode);
+		if (!ea.contains(reasonCode))
+			throw new MqttReaderException('Invalid pubrec reason code ${reasonCode}.');
+		var properties = readProperties(PropertyKind.Pubrec);
+		return {
+			packetIdentifier: packetIdentifier,
+			reasonCode: reasonCode,
+			properties: properties
+		};
 	}
 }
 
@@ -488,7 +498,17 @@ class PubrelPropertiesReader extends Reader {
 
 class PubrelReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var packetIdentifier = readUInt16();
+		var reasonCode = readByte();
+		var ea = AbstractEnumTools.getValues(PubrelReasonCode);
+		if (!ea.contains(reasonCode))
+			throw new MqttReaderException('Invalid pubrel reason code ${reasonCode}.');
+		var properties = readProperties(PropertyKind.Pubrel);
+		return {
+			packetIdentifier: packetIdentifier,
+			reasonCode: reasonCode,
+			properties: properties
+		};
 	}
 }
 
