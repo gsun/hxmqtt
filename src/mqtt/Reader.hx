@@ -539,7 +539,17 @@ class PubcompPropertiesReader extends Reader {
 
 class PubcompReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var packetIdentifier = readUInt16();
+		var reasonCode = readByte();
+		var ea = AbstractEnumTools.getValues(PubcompReasonCode);
+		if (!ea.contains(reasonCode))
+			throw new MqttReaderException('Invalid pubcomp reason code ${reasonCode}.');
+		var properties = readProperties(PropertyKind.Pubcomp);
+		return {
+			packetIdentifier: packetIdentifier,
+			reasonCode: reasonCode,
+			properties: properties
+		};
 	}
 }
 

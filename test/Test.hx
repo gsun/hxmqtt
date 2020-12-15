@@ -18,7 +18,8 @@ class Test {
 			new PublishTest(),
 			new PubackTest(),
 			new PubrecTest(),
-			new PubrelTest()
+			new PubrelTest(),
+			new PubcompTest()
 		]);
 	}
 }
@@ -896,6 +897,44 @@ class PubrelTest extends utest.Test {
 			pktType: CtrlPktType.Pubrel,
 			dup: false,
 			qos: QoS.AtLeastOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 2,
+				reasonCode: 146,
+				properties: {
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+}
+
+class PubcompTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			112, 24, // Header
+			0, 2, // Message ID
+			146, // reason code
+			20, // properties length
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: CtrlPktType.Pubcomp,
+			dup: false,
+			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
 				packetIdentifier: 2,
