@@ -415,16 +415,15 @@ class PubackPropertiesReader extends Reader {
 
 class PubackReader extends Reader {
 	override public function read():Dynamic {
-		bits.readBits(7);
-		var sessionPresent = bits.readBit();
+		var packetIdentifier = readUInt16();
 		var reasonCode = readByte();
 		var ea = AbstractEnumTools.getValues(PubackReasonCode);
 		if (!ea.contains(reasonCode))
-			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
+			throw new MqttReaderException('Invalid puback reason code ${reasonCode}.');
 		var properties = readProperties(PropertyKind.Puback);
 		return {
+			packetIdentifier: packetIdentifier,
 			reasonCode: reasonCode,
-			sessionPresent: sessionPresent,
 			properties: properties
 		};
 	}

@@ -12,7 +12,7 @@ import mqtt.Data;
 
 class Test {
 	public static function main() {
-		utest.UTest.run([new ConnectTest(), new ConnackTest(), new PublishTest()]);
+		utest.UTest.run([new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest()]);
 	}
 }
 
@@ -771,7 +771,6 @@ class PublishTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb1.getBytes()));
 		var p = r.read();
-		trace(p);
 
 		Assert.same({
 			pktType: CtrlPktType.Publish,
@@ -786,6 +785,44 @@ class PublishTest extends utest.Test {
 					subscriptionIdentifier: [1, 268435455]
 				},
 				payload: bb2.getBytes()
+			}
+		}, p);
+	}
+}
+
+class PubackTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			64, 24, // Header
+			0, 2, // Message ID
+			16, // reason code
+			20, // properties length
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Puback,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 2,
+				reasonCode: 16,
+				properties: {
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
 			}
 		}, p);
 	}
