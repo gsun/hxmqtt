@@ -135,7 +135,9 @@ typedef UnsubscribeBody = {
 typedef UnsubackProperties = SubscribeProperties;
 
 typedef UnsubackBody = {
+	var packetIdentifier:Int;
 	@:optional var properties:UnsubackProperties;
+	var granted:Array<Int>;
 }
 
 typedef PubackProperties = SubscribeProperties;

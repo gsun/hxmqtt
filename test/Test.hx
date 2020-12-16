@@ -14,7 +14,7 @@ class Test {
 	public static function main() {
 		utest.UTest.run([
 			new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest(), new PubrecTest(), new PubrelTest(), new PubcompTest(),
-			new SubscribeTest(), new SubackTest(), new UnsubscribeTest()]);
+			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest()]);
 	}
 }
 
@@ -1115,7 +1115,7 @@ class UnsubscribeTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Unsubscribe,
 			dup: false,
@@ -1129,6 +1129,44 @@ class UnsubscribeTest extends utest.Test {
 					}
 				},
 				unsubscriptions: ["tfst", "test"]
+			}
+		}, p);
+	}
+}
+
+class UnsubackTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			176, 25, // Header
+			0, 8, // Message ID
+			20, // properties length
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116,
+			101, 115, 116, // userProperties
+			0, 128 // success and error
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: CtrlPktType.Unsuback,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 8,
+				properties: {
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				},
+				granted: [0, 128]
 			}
 		}, p);
 	}

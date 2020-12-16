@@ -730,7 +730,25 @@ class UnsubackPropertiesReader extends Reader {
 
 class UnsubackReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var packetIdentifier = readUInt16();
+		var properties = readProperties(PropertyKind.Unsuback);
+		var granted:Array<SubackReasonCode> = [];
+		try {
+			while (!eof()) {
+				var reasonCode = readByte();
+				var ea = AbstractEnumTools.getValues(UnsubackReasonCode);
+				if (!ea.contains(reasonCode))
+					throw new MqttReaderException('Invalid unsuback reason code ${reasonCode}.');
+				granted.push(reasonCode);
+			}
+		} catch (e) {
+			trace(e);
+		}
+		return {
+			packetIdentifier: packetIdentifier,
+			properties: properties,
+			granted: granted
+		};
 	}
 }
 
