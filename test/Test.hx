@@ -13,16 +13,8 @@ import mqtt.Data;
 class Test {
 	public static function main() {
 		utest.UTest.run([
-			new ConnectTest(),
-			new ConnackTest(),
-			new PublishTest(),
-			new PubackTest(),
-			new PubrecTest(),
-			new PubrelTest(),
-			new PubcompTest(),
-			new SubscribeTest(),
-			new SubackTest()
-		]);
+			new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest(), new PubrecTest(), new PubrelTest(), new PubcompTest(),
+			new SubscribeTest(), new SubackTest(), new UnsubscribeTest()]);
 	}
 }
 
@@ -1084,7 +1076,7 @@ class SubackTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Suback,
 			dup: false,
@@ -1099,6 +1091,44 @@ class SubackTest extends utest.Test {
 					}
 				},
 				granted: [0, 1, 2, 128]
+			}
+		}, p);
+	}
+}
+
+class UnsubscribeTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			162, 28, 0, 7, // Message ID (7)
+			13, // properties length
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			0,
+			4, // Topic length
+			116, 102, 115, 116, // Topic (tfst)
+			0, 4, // Topic length,
+			116, 101, 115, 116 // Topic (test)
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: CtrlPktType.Unsubscribe,
+			dup: false,
+			qos: QoS.AtLeastOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 7,
+				properties: {
+					userProperty: {
+						test: "test"
+					}
+				},
+				unsubscriptions: ["tfst", "test"]
 			}
 		}, p);
 	}

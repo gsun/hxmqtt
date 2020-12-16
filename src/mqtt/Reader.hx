@@ -684,7 +684,22 @@ class UnsubscribePropertiesReader extends Reader {
 
 class UnsubscribeReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var packetIdentifier = readUInt16();
+		var properties = readProperties(PropertyKind.Unsubscribe);
+		var unsubscriptions:Array<String> = [];
+		try {
+			while (!eof()) {
+				var topic = readString();
+				unsubscriptions.push(topic);
+			}
+		} catch (e) {
+			trace(e);
+		}
+		return {
+			packetIdentifier: packetIdentifier,
+			properties: properties,
+			unsubscriptions: unsubscriptions
+		};
 	}
 }
 
