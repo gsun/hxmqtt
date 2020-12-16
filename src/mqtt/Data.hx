@@ -112,6 +112,7 @@ typedef SubscribeProperties = {
 }
 
 typedef SubscribeBody = {
+	var packetIdentifier:Int;
 	var subscriptions:Array<Subscription>;
 	@:optional var properties:SubscribeProperties;
 }
@@ -119,6 +120,7 @@ typedef SubscribeBody = {
 typedef SubackProperties = SubscribeProperties;
 
 typedef SubackBody = {
+	var packetIdentifier:Int;
 	@:optional var properties:SubackProperties;
 	var granted:Array<Int>;
 }

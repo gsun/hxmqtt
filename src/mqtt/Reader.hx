@@ -603,6 +603,7 @@ class SubscribeReader extends Reader {
 			trace(e);
 		}
 		return {
+			packetIdentifier: packetIdentifier,
 			subscriptions: subscriptions,
 			properties: properties
 		};
@@ -636,7 +637,25 @@ class SubackPropertiesReader extends Reader {
 
 class SubackReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var packetIdentifier = readUInt16();
+		var properties = readProperties(PropertyKind.Suback);
+		var granted:Array<SubackReasonCode> = [];
+		try {
+			while (!eof()) {
+				var reasonCode = readByte();
+				var ea = AbstractEnumTools.getValues(SubackReasonCode);
+				if (!ea.contains(reasonCode))
+					throw new MqttReaderException('Invalid suback reason code ${reasonCode}.');
+				granted.push(reasonCode);
+			}
+		} catch (e) {
+			trace(e);
+		}
+		return {
+			packetIdentifier: packetIdentifier,
+			properties: properties,
+			granted: granted
+		};
 	}
 }
 

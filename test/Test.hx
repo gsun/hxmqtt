@@ -20,7 +20,8 @@ class Test {
 			new PubrecTest(),
 			new PubrelTest(),
 			new PubcompTest(),
-			new SubscribeTest()
+			new SubscribeTest(),
+			new SubackTest()
 		]);
 	}
 }
@@ -978,6 +979,7 @@ class SubscribeTest extends utest.Test {
 			qos: QoS.AtLeastOnce,
 			retain: false,
 			body: {
+				packetIdentifier: 6,
 				subscriptions: [
 					{
 						topic: "test",
@@ -1022,13 +1024,14 @@ class SubscribeTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Subscribe,
 			dup: false,
 			qos: QoS.AtLeastOnce,
 			retain: false,
 			body: {
+				packetIdentifier: 6,
 				subscriptions: [
 					{
 						topic: "test",
@@ -1058,6 +1061,44 @@ class SubscribeTest extends utest.Test {
 						test: "test"
 					}
 				}
+			}
+		}, p);
+	}
+}
+
+class SubackTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			144, 27, // Header
+			0, 6, // Message ID
+			20, // properties length
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116,
+			101, 115, 116, // userProperties
+			0, 1, 2, 128 // Granted qos (0, 1, 2) and a rejected being 0x80
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: CtrlPktType.Suback,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {
+				packetIdentifier: 6,
+				properties: {
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				},
+				granted: [0, 1, 2, 128]
 			}
 		}, p);
 	}
