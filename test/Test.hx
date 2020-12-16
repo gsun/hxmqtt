@@ -14,7 +14,7 @@ class Test {
 	public static function main() {
 		utest.UTest.run([
 			new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest(), new PubrecTest(), new PubrelTest(), new PubcompTest(),
-			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest(), new AuthTest()]);
+			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest(), new AuthTest(), new DisconnectTest()]);
 	}
 }
 
@@ -1191,7 +1191,7 @@ class AuthTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Auth,
 			dup: false,
@@ -1203,6 +1203,45 @@ class AuthTest extends utest.Test {
 					authenticationMethod: "test",
 					authenticationData: Bytes.ofHex("00010203"),
 					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+}
+
+class DisconnectTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			224, 34, // Header
+			0, // reason code
+			32, // properties length
+			17, 0, 0, 0, 145, // sessionExpiryInterval
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			28, 0, 4, 116, 101, 115, 116 // serverReference
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Disconnect,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {
+				reasonCode: 0,
+				properties: {
+					sessionExpiryInterval: 145,
+					reasonString: "test",
+					serverReference: "test",
 					userProperty: {
 						test: "test"
 					}

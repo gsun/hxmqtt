@@ -800,10 +800,10 @@ class DisconnectPropertiesReader extends Reader {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
-					case DisconnectPropertyId.AuthenticationMethod:
-						Reflect.setField(p, "authenticationMethod", readString());
-					case DisconnectPropertyId.AuthenticationData:
-						Reflect.setField(p, "authenticationData", readBinary());
+					case DisconnectPropertyId.SessionExpiryInterval:
+						Reflect.setField(p, "sessionExpiryInterval", readInt32());
+					case DisconnectPropertyId.ServerReference:
+						Reflect.setField(p, "serverReference", readString());
 					case DisconnectPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case DisconnectPropertyId.UserProperty:
@@ -823,6 +823,11 @@ class DisconnectPropertiesReader extends Reader {
 
 class DisconnectReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var reasonCode = readByte();
+		var ea = AbstractEnumTools.getValues(DisconnectReasonCode);
+		if (!ea.contains(reasonCode))
+			throw new MqttReaderException('Invalid disconnect reason code ${reasonCode}.');
+		var properties = readProperties(PropertyKind.Disconnect);
+		return {reasonCode: reasonCode, properties: properties};
 	}
 }

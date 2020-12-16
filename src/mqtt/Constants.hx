@@ -239,8 +239,8 @@ enum abstract SubscribePropertyId(Int) from Int to Int {
 }
 
 enum abstract DisconnectPropertyId(Int) from Int to Int {
-	var AuthenticationMethod = 21;
-	var AuthenticationData = 22;
+	var SessionExpiryInterval = 17;
+	var ServerReference = 28;
 	var ReasonString = 31;
 	var UserProperty = 38;
 }
