@@ -1030,21 +1030,21 @@ class SubscribeTest extends utest.Test {
 						rh: 1,
 						rap: true,
 						nl: false,
-						qos: 0
+						qos: QoS.AtMostOnce
 					},
 					{
 						topic: "uest",
 						rh: 0,
 						rap: false,
 						nl: false,
-						qos: 1
+						qos: QoS.AtLeastOnce
 					},
 					{
 						topic: "tfst",
 						rh: 0,
 						rap: false,
 						nl: true,
-						qos: 2
+						qos: QoS.ExactlyOnce
 					}
 				],
 				properties: {
@@ -1198,7 +1198,7 @@ class AuthTest extends utest.Test {
 			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
-				reasonCode: 0,
+				reasonCode: AuthReasonCode.Success,
 				properties: {
 					authenticationMethod: "test",
 					authenticationData: Bytes.ofHex("00010203"),
@@ -1237,7 +1237,7 @@ class DisconnectTest extends utest.Test {
 			qos: QoS.AtMostOnce,
 			retain: false,
 			body: {
-				reasonCode: 0,
+				reasonCode: DisconnectReasonCode.NormalDisconnection,
 				properties: {
 					sessionExpiryInterval: 145,
 					reasonString: "test",
