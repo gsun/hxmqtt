@@ -583,7 +583,29 @@ class SubscribeReader extends Reader {
 		var packetIdentifier = readUInt16();
 		var properties = readProperties(PropertyKind.Subscribe);
 		var subscriptions:Array<Subscription> = [];
-		return {};
+		try {
+			while (!eof()) {
+				var topic = readString();
+				bits.readBits(2);
+				var rh = bits.readBits(2);
+				var rap = bits.readBit();
+				var nl = bits.readBit();
+				var qos = bits.readBits(2);
+				subscriptions.push({
+					topic: topic,
+					rh: rh,
+					rap: rap,
+					nl: nl,
+					qos: qos
+				});
+			}
+		} catch (e) {
+			trace(e);
+		}
+		return {
+			subscriptions: subscriptions,
+			properties: properties
+		};
 	}
 }
 

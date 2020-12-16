@@ -19,7 +19,8 @@ class Test {
 			new PubackTest(),
 			new PubrecTest(),
 			new PubrelTest(),
-			new PubcompTest()
+			new PubcompTest(),
+			new SubscribeTest()
 		]);
 	}
 }
@@ -930,7 +931,7 @@ class PubcompTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Pubcomp,
 			dup: false,
@@ -941,6 +942,118 @@ class PubcompTest extends utest.Test {
 				reasonCode: 146,
 				properties: {
 					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+}
+
+class SubscribeTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			130, 26, // Header (subscribeqos=1length=9)
+			0, 6, // Message ID (6)
+			16, // properties length
+			11, 145, 1, // subscriptionIdentifier
+			38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			0, 4, // Topic length,
+			116, 101, 115, 116, // Topic (test)
+			24 // settings(qos: 0, noLocal: false, Retain as Published: true, retain handling: 1)
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Subscribe,
+			dup: false,
+			qos: QoS.AtLeastOnce,
+			retain: false,
+			body: {
+				subscriptions: [
+					{
+						topic: "test",
+						rh: 1,
+						rap: true,
+						nl: false,
+						qos: QoS.AtMostOnce
+					}
+				],
+				properties: {
+					subscriptionIdentifier: 145,
+					userProperty: {
+						test: "test"
+					}
+				}
+			}
+		}, p);
+	}
+
+	public function testMultiTopics() {
+		var p1 = [
+			130, 40, // Header (subscribeqos=1length=9)
+			0, 6, // Message ID (6)
+			16, // properties length
+			11, 145, 1, // subscriptionIdentifier
+			38, 0, 4, 116, 101,
+			115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			0, 4, // Topic length,
+			116, 101, 115, 116, // Topic (test)
+			24, // settings(qos: 0, noLocal: false, Retain as Published: true, retain handling: 1)
+			0, 4, // Topic length
+			117, 101, 115, 116, // Topic (uest)
+			1, // Qos (1)
+			0, 4, // Topic length
+			116, 102, 115, 116, // Topic (tfst)
+			6 // Qos (2), No Local: true
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: CtrlPktType.Subscribe,
+			dup: false,
+			qos: QoS.AtLeastOnce,
+			retain: false,
+			body: {
+				subscriptions: [
+					{
+						topic: "test",
+						rh: 1,
+						rap: true,
+						nl: false,
+						qos: 0
+					},
+					{
+						topic: "uest",
+						rh: 0,
+						rap: false,
+						nl: false,
+						qos: 1
+					},
+					{
+						topic: "tfst",
+						rh: 0,
+						rap: false,
+						nl: true,
+						qos: 2
+					}
+				],
+				properties: {
+					subscriptionIdentifier: 145,
 					userProperty: {
 						test: "test"
 					}
