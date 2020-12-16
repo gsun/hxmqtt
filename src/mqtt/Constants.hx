@@ -256,8 +256,8 @@ enum abstract WillPropertyId(Int) from Int to Int {
 }
 
 enum abstract AuthPropertyId(Int) from Int to Int {
-	var SessionExpiryInterval = 17;
-	var ServerReference = 28;
+	var AuthenticationMethod = 21;
+	var AuthenticationData = 22;
 	var ReasonString = 31;
 	var UserProperty = 38;
 }

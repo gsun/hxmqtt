@@ -14,7 +14,7 @@ class Test {
 	public static function main() {
 		utest.UTest.run([
 			new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest(), new PubrecTest(), new PubrelTest(), new PubcompTest(),
-			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest()]);
+			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest(), new AuthTest()]);
 	}
 }
 
@@ -1152,7 +1152,7 @@ class UnsubackTest extends utest.Test {
 
 		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
 		var p = r.read();
-		trace(p);
+
 		Assert.same({
 			pktType: CtrlPktType.Unsuback,
 			dup: false,
@@ -1167,6 +1167,46 @@ class UnsubackTest extends utest.Test {
 					}
 				},
 				granted: [0, 128]
+			}
+		}, p);
+	}
+}
+
+class AuthTest extends utest.Test {
+	public function testV5() {
+		var p1 = [
+			240, 36, // Header
+			0, // reason code
+			34, // properties length
+			21, 0, 4, 116, 101, 115, 116, // auth method
+			22, 0, 4, 0, 1, 2, 3, // auth data
+			31, 0, 4,
+			116, 101, 115, 116, // reasonString
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+		trace(p);
+		Assert.same({
+			pktType: CtrlPktType.Auth,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {
+				reasonCode: 0,
+				properties: {
+					authenticationMethod: "test",
+					authenticationData: Bytes.ofHex("00010203"),
+					reasonString: "test",
+					userProperty: {
+						test: "test"
+					}
+				}
 			}
 		}, p);
 	}

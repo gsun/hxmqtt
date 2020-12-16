@@ -178,13 +178,14 @@ typedef DisconnectBody = {
 }
 
 typedef AuthProperties = {
-	@:optional var sessionExpiryInterval:Int;
-	@:optional var reasonString:String;
+	@:optional var authenticationMethod:String;
+	@:optional var authenticationData:Bytes;
 	@:optional var userProperties:Dynamic;
-	@:optional var serverReference:String;
+	@:optional var reasonString:String;
 }
 
 typedef AuthBody = {
+	@:optional var reasonCode:AuthReasonCode;
 	@:optional var properties:AuthProperties;
 }
 

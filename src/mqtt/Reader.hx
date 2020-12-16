@@ -12,14 +12,14 @@ class Reader {
 		Connect => "mqtt.ConnectReader", Connack => "mqtt.ConnackReader", Publish => "mqtt.PublishReader", Puback => "mqtt.PubackReader",
 		Pubrec => "mqtt.PubrecReader", Pubrel => "mqtt.PubrelReader", Pubcomp => "mqtt.PubcompReader", Subscribe => "mqtt.SubscribeReader",
 		Suback => "mqtt.SubackReader", Unsubscribe => "mqtt.UnsubscribeReader", Unsuback => "mqtt.UnsubackReader", Disconnect => "mqtt.DisconnectReader",
-		Auth => "mqtt.ConnectReader"
+		Auth => "mqtt.AuthReader"
 	];
 	static var pkCls:Map<PropertyKind, String> = [
 		Connect => "mqtt.ConnectPropertiesReader", Connack => "mqtt.ConnackPropertiesReader", Publish => "mqtt.PublishPropertiesReader",
 		Puback => "mqtt.PubackPropertiesReader", Pubrec => "mqtt.PubrecPropertiesReader", Pubrel => "mqtt.PubrelPropertiesReader",
 		Pubcomp => "mqtt.PubcompPropertiesReader", Subscribe => "mqtt.SubscribePropertiesReader", Suback => "mqtt.SubackPropertiesReader",
 		Unsubscribe => "mqtt.UnsubscribePropertiesReader", Unsuback => "mqtt.UnsubackPropertiesReader", Disconnect => "mqtt.DisconnectPropertiesReader",
-		Auth => "mqtt.ConnectPropertiesReader", Will => "mqtt.WillPropertiesReader"
+		Auth => "mqtt.AuthPropertiesReader", Will => "mqtt.WillPropertiesReader"
 	];
 
 	public function new(i) {
@@ -760,15 +760,14 @@ class AuthPropertiesReader extends Reader {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
-					case AuthPropertyId.SessionExpiryInterval:
-						Reflect.setField(p, "sessionExpiryInterval", readInt32());
-					case AuthPropertyId.ServerReference:
-						Reflect.setField(p, "serverReference", readString());
+					case AuthPropertyId.AuthenticationMethod:
+						Reflect.setField(p, "authenticationMethod", readString());
+					case AuthPropertyId.AuthenticationData:
+						Reflect.setField(p, "authenticationData", readBinary());
 					case AuthPropertyId.ReasonString:
 						Reflect.setField(p, "reasonString", readString());
 					case AuthPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
-
 					default:
 						throw new MqttReaderException('Invalid auth property id ${propertyId}.');
 				}
@@ -784,7 +783,12 @@ class AuthPropertiesReader extends Reader {
 
 class AuthReader extends Reader {
 	override public function read():Dynamic {
-		return {};
+		var reasonCode = readByte();
+		var ea = AbstractEnumTools.getValues(AuthReasonCode);
+		if (!ea.contains(reasonCode))
+			throw new MqttReaderException('Invalid auth reason code ${reasonCode}.');
+		var properties = readProperties(PropertyKind.Auth);
+		return {reasonCode: reasonCode, properties: properties};
 	}
 }
 
