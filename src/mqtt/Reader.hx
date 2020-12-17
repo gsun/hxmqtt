@@ -84,7 +84,7 @@ class Reader {
 	function readBody(t:CtrlPktType) {
 		var cl = Type.resolveClass(ptCls[t]);
 		if (cl == null)
-			throw new MqttReaderException("pkt reader ${t} resolveClass ${ptCls[t]} fail");
+			return {};
 
 		var remainingLength = readVariableByteInteger();
 		if (remainingLength == 0)
@@ -104,7 +104,7 @@ class Reader {
 	function readProperties(pc:PropertyKind) {
 		var cl = Type.resolveClass(pkCls[pc]);
 		if (cl == null)
-			throw new MqttReaderException("property reader ${pc} resolveClass ${pkCls[pc]} fail");
+			return {};
 
 		var length = readVariableByteInteger();
 		if (length == 0)
@@ -126,9 +126,9 @@ class Reader {
 		var dup = bits.readBit();
 		var qos = bits.readBits(2);
 		var retain = bits.readBit();
-		if (pktType <= cast(CtrlPktType.Reserved, Int) || pktType > cast(CtrlPktType.Auth, Int))
+		if (!AbstractEnumTools.getValues(CtrlPktType).contains(pktType))
 			throw new MqttReaderException('invalid packet type ${pktType}');
-		if (qos < cast(QoS.AtMostOnce, Int) || qos > cast(QoS.ExactlyOnce, Int))
+		if (!AbstractEnumTools.getValues(QoS).contains(qos))
 			throw new MqttReaderException('invalid Qos ${qos}');
 		var body = readBody(pktType);
 		return {

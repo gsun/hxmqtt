@@ -14,7 +14,8 @@ class Test {
 	public static function main() {
 		utest.UTest.run([
 			new ConnectTest(), new ConnackTest(), new PublishTest(), new PubackTest(), new PubrecTest(), new PubrelTest(), new PubcompTest(),
-			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest(), new AuthTest(), new DisconnectTest()]);
+			new SubscribeTest(), new SubackTest(), new UnsubscribeTest(), new UnsubackTest(), new AuthTest(), new DisconnectTest(), new PingreqTest(),
+			new PingrespTest()]);
 	}
 }
 
@@ -1247,6 +1248,50 @@ class DisconnectTest extends utest.Test {
 					}
 				}
 			}
+		}, p);
+	}
+}
+
+class PingreqTest extends utest.Test {
+	public function testV5() {
+		var p1 = [192, 0 // Header
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Pingreq,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {}
+		}, p);
+	}
+}
+
+class PingrespTest extends utest.Test {
+	public function testV5() {
+		var p1 = [208, 0 // Header
+		];
+
+		var bb = new BytesBuffer();
+		for (i in p1)
+			bb.addByte(i);
+
+		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
+		var p = r.read();
+
+		Assert.same({
+			pktType: CtrlPktType.Pingresp,
+			dup: false,
+			qos: QoS.AtMostOnce,
+			retain: false,
+			body: {}
 		}, p);
 	}
 }
