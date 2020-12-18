@@ -13,7 +13,7 @@ class Writer {
 		Connect => "mqtt.ConnectWriter", Connack => "mqtt.ConnackWriter", Publish => "mqtt.PublishWriter", Puback => "mqtt.PubackWriter",
 		Pubrec => "mqtt.PubrecWriter", Pubrel => "mqtt.PubrelWriter", Pubcomp => "mqtt.PubcompWriter", Subscribe => "mqtt.SubscribeWriter",
 		Suback => "mqtt.SubackWriter", Unsubscribe => "mqtt.UnsubscribeWriter", Unsuback => "mqtt.UnsubackWriter", Disconnect => "mqtt.DisconnectWriter",
-		Auth => "mqtt.AuthWriter"
+		Auth => "mqtt.AuthWriter", Pingreq => "mqtt.PingreqWriter", Pingresp => "mqtt.PingrespWriter"
 	];
 	static var pkCls:Map<PropertyKind, String> = [
 		Connect => "mqtt.ConnectPropertiesWriter", Connack => "mqtt.ConnackPropertiesWriter", Publish => "mqtt.PublishPropertiesWriter",
@@ -55,7 +55,7 @@ class Writer {
 		var y = x;
 		do {
 			var b = y % 128;
-			y = cast(y / 128);
+			y = Math.floor(y / 128);
 			if (y > 0)
 				b = b | 128;
 			o.writeByte(b);
@@ -78,7 +78,8 @@ class Writer {
 		try {
 			writer.write(p);
 			writeVariableByteInteger(bo.length);
-			o.write(bo.getBytes());
+			if (bo.length > 0)
+				o.write(bo.getBytes());
 		} catch (e) {
 			trace(e);
 		}
@@ -93,7 +94,8 @@ class Writer {
 		try {
 			writer.write(p);
 			writeVariableByteInteger(bo.length);
-			o.write(bo.getBytes());
+			if (bo.length > 0)
+				o.write(bo.getBytes());
 		} catch (e) {
 			trace(e);
 		}
@@ -144,9 +146,9 @@ class ConnectPropertiesWriter extends Writer {
 					writeInt32(properties.maximumPacketSize);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(ConnectPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(ConnectPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -188,9 +190,9 @@ class WillPropertiesWriter extends Writer {
 					writeInt32(properties.willDelayInterval);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(WillPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(WillPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -204,6 +206,7 @@ class WillPropertiesWriter extends Writer {
 
 class ConnectWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		var userNameFlag = Reflect.hasField(b, "username");
 		var passwordFlag = Reflect.hasField(b, "password");
@@ -303,9 +306,9 @@ class ConnackPropertiesWriter extends Writer {
 					writeByte(properties.sharedSubscriptionAvailabe);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(ConnackPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(ConnackPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -319,6 +322,7 @@ class ConnackPropertiesWriter extends Writer {
 
 class ConnackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		bits.writeBits(7, 0);
 		bits.writeBit(b.sessionPresent);
@@ -357,15 +361,15 @@ class PublishPropertiesWriter extends Writer {
 					writeUInt16(properties.topicAlias);
 				}
 				if (Reflect.hasField(properties, "subscriptionIdentifier")) {
-					writeVariableByteInteger(PublishPropertyId.SubscriptionIdentifier);
 					for (i in properties.subscriptionIdentifier) {
+						writeVariableByteInteger(PublishPropertyId.SubscriptionIdentifier);
 						writeVariableByteInteger(i);
 					}
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(PublishPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(PublishPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -379,10 +383,12 @@ class PublishPropertiesWriter extends Writer {
 
 class PublishWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeString(b.topic);
 		writeUInt16(b.packetIdentifier);
 		writeProperties(PropertyKind.Publish);
+		o.write(b.payload);
 	}
 }
 
@@ -396,9 +402,9 @@ class PubackPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(PubackPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(PubackPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -412,6 +418,7 @@ class PubackPropertiesWriter extends Writer {
 
 class PubackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
@@ -429,9 +436,9 @@ class PubrecPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(PubrecPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(PubrecPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -445,6 +452,7 @@ class PubrecPropertiesWriter extends Writer {
 
 class PubrecWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
@@ -462,9 +470,9 @@ class PubrelPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(PubrelPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(PubrelPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -478,6 +486,7 @@ class PubrelPropertiesWriter extends Writer {
 
 class PubrelWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
@@ -495,9 +504,9 @@ class PubcompPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(PubcompPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(PubcompPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -511,6 +520,7 @@ class PubcompPropertiesWriter extends Writer {
 
 class PubcompWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
@@ -528,9 +538,9 @@ class SubscribePropertiesWriter extends Writer {
 					writeVariableByteInteger(properties.subscriptionIdentifier);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(SubscribePropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(SubscribePropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -544,6 +554,7 @@ class SubscribePropertiesWriter extends Writer {
 
 class SubscribeWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b:SubscribeBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
 		writeProperties(PropertyKind.Subscribe);
@@ -584,6 +595,7 @@ class SubackPropertiesWriter extends Writer {
 
 class SubackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b:SubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
 		writeProperties(PropertyKind.Suback);
@@ -599,9 +611,9 @@ class UnsubscribePropertiesWriter extends Writer {
 			if (Reflect.hasField(p.body, "properties")) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(UnsubscribePropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(UnsubscribePropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -615,6 +627,7 @@ class UnsubscribePropertiesWriter extends Writer {
 
 class UnsubscribeWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b:UnsubscribeBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
 		writeProperties(PropertyKind.Unsubscribe);
@@ -634,9 +647,9 @@ class UnsubackPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(UnsubackPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(UnsubackPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -650,6 +663,7 @@ class UnsubackPropertiesWriter extends Writer {
 
 class UnsubackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b:UnsubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
 		writeProperties(PropertyKind.Unsuback);
@@ -677,9 +691,9 @@ class AuthPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(AuthPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(AuthPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -693,6 +707,7 @@ class AuthPropertiesWriter extends Writer {
 
 class AuthWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeByte(b.reasonCode);
 		writeProperties(PropertyKind.Auth);
@@ -703,7 +718,7 @@ class DisconnectPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
 			if (Reflect.hasField(p.body, "properties")) {
-				var properties = p.body.properties;
+				var properties:DisconnectProperties = cast p.body.properties;
 				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
 					writeVariableByteInteger(DisconnectPropertyId.SessionExpiryInterval);
 					writeInt32(properties.sessionExpiryInterval);
@@ -717,9 +732,9 @@ class DisconnectPropertiesWriter extends Writer {
 					writeString(properties.reasonString);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
-					writeVariableByteInteger(DisconnectPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
+						writeVariableByteInteger(DisconnectPropertyId.UserProperty);
 						writeString(f);
 						writeString(Reflect.field(userProperty, f));
 					}
@@ -733,8 +748,17 @@ class DisconnectPropertiesWriter extends Writer {
 
 class DisconnectWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		this.p = p;
 		var b = p.body;
 		writeByte(b.reasonCode);
 		writeProperties(PropertyKind.Disconnect);
 	}
+}
+
+class PingrespWriter extends Writer {
+	override public function write(p:MqttPacket) {}
+}
+
+class PingreqWriter extends Writer {
+	override public function write(p:MqttPacket) {}
 }

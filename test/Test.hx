@@ -536,35 +536,6 @@ class ConnackTest extends utest.Test {
 }
 
 class PublishTest extends utest.Test {
-	public function testMin() {
-		var p1 = [
-			48, 10, // Header
-			0, 4, // Topic length
-			116, 101, 115, 116, // Topic (test)
-			116, 101, 115, 116 // Payload (test)
-		];
-
-		var bb = new BytesBuffer();
-		for (i in p1)
-			bb.addByte(i);
-
-		var r = new Reader(new haxe.io.BytesInput(bb.getBytes()));
-		var p = r.read();
-
-		Assert.same({
-			pktType: CtrlPktType.Publish,
-			dup: false,
-			qos: QoS.AtMostOnce,
-			retain: false,
-			body: {
-				topic: "test",
-				packetIdentifier: 29797,
-				properties: {},
-				payload: Bytes.ofString("")
-			}
-		}, p);
-	}
-
 	public function testV5() {
 		var p1 = [
 			61, 86, // Header
@@ -617,6 +588,35 @@ class PublishTest extends utest.Test {
 				payload: Bytes.ofString('test')
 			}
 		}, p);
+
+		var p2 = [
+			61, 60, // Header
+			0, 4, // Topic length
+			116, 101, 115, 116, // Topic (test)
+			0, 10, // Message ID
+			47, // properties length
+			1,
+			1, // payloadFormatIndicator
+			2, 0, 0, 16, 225, // message expiry interval
+			3, 0, 4, 116, 101, 115, 116, // content type
+			8, 0, 5, 116, 111, 112, 105,
+			99, // response topic
+			9, 0, 4, 1, 2, 3, 4, // correlationData
+			35, 0, 100, // topicAlias
+			11, 120, // subscriptionIdentifier
+			38, 0, 4, 116, 101, 115,
+			116, 0, 4, 116, 101, 115, 116, // userProperties
+			116, 101, 115, 116 // Payload (test)
+		];
+
+		var bb1 = new BytesBuffer();
+		for (i in p2)
+			bb1.addByte(i);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb1.getBytes(), o.getBytes());
 	}
 
 	public function testMultiSubscriptionIdentifier() {
@@ -629,16 +629,18 @@ class PublishTest extends utest.Test {
 			1,
 			1, // payloadFormatIndicator
 			2, 0, 0, 16, 225, // message expiry interval
-			35, 0, 100, // topicAlias
-			8, 0, 5, 116, 111, 112, 105, 99, // response topic
-			9, 0, 4, 1, 2, 3, 4, // correlationData
-			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
-			11, 120, // subscriptionIdentifier
-			11, 121, // subscriptionIdentifier
-			11, 122, // subscriptionIdentifier
 			3, 0, 4, 116, 101, 115, 116, // content type
-			116, 101, 115,
-			116 // Payload (test)
+			8, 0, 5, 116, 111, 112, 105,
+			99, // response topic
+			9, 0, 4, 1, 2, 3, 4, // correlationData
+			35, 0, 100, // topicAlias
+			11, 120, // subscriptionIdentifier
+			11,
+			121, // subscriptionIdentifier
+			11, 122, // subscriptionIdentifier
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+			116, 101,
+			115, 116 // Payload (test)
 		];
 
 		var bb = new BytesBuffer();
@@ -671,6 +673,11 @@ class PublishTest extends utest.Test {
 				payload: Bytes.ofString('test')
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 
 	public function testVariableSubscriptionIdentifier() {
@@ -711,6 +718,11 @@ class PublishTest extends utest.Test {
 				payload: Bytes.ofString("test")
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 
 	public function testMaxSubscriptionIdentifier() {
@@ -748,6 +760,11 @@ class PublishTest extends utest.Test {
 				payload: Bytes.ofString("test")
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 
 	public function test2kPayload() {
@@ -791,6 +808,11 @@ class PublishTest extends utest.Test {
 				payload: bb2.getBytes()
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb1.getBytes(), o.getBytes());
 	}
 }
 
@@ -829,6 +851,11 @@ class PubackTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -867,6 +894,11 @@ class PubrecTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -905,6 +937,11 @@ class PubrelTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -943,6 +980,11 @@ class PubcompTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -991,6 +1033,11 @@ class SubscribeTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 
 	public function testMultiTopics() {
@@ -1057,6 +1104,11 @@ class SubscribeTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1095,6 +1147,11 @@ class SubackTest extends utest.Test {
 				granted: [0, 1, 2, 128]
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1133,6 +1190,11 @@ class UnsubscribeTest extends utest.Test {
 				unsubscriptions: ["tfst", "test"]
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1171,6 +1233,11 @@ class UnsubackTest extends utest.Test {
 				granted: [0, 128]
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1211,6 +1278,11 @@ class AuthTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1221,9 +1293,10 @@ class DisconnectTest extends utest.Test {
 			0, // reason code
 			32, // properties length
 			17, 0, 0, 0, 145, // sessionExpiryInterval
+			28, 0, 4, 116, 101, 115,
+			116, // serverReference
 			31, 0, 4, 116, 101, 115, 116, // reasonString
-			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
-			28, 0, 4, 116, 101, 115, 116 // serverReference
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
 		];
 
 		var bb = new BytesBuffer();
@@ -1250,6 +1323,11 @@ class DisconnectTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1272,6 +1350,11 @@ class PingreqTest extends utest.Test {
 			retain: false,
 			body: {}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
 
@@ -1294,5 +1377,10 @@ class PingrespTest extends utest.Test {
 			retain: false,
 			body: {}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 }
