@@ -19,7 +19,7 @@ typedef WillProperties = {
 	@:optional var contentType:String;
 	@:optional var responseTopic:String;
 	@:optional var correlationData:Bytes;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 }
 
 typedef Will = {
@@ -37,7 +37,7 @@ typedef ConnectProperties = {
 	@:optional var topicAliasMaximum:Int;
 	@:optional var requestResponseInformation:Bool;
 	@:optional var requestProblemInformation:Bool;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 	@:optional var authenticationMethod:String;
 	@:optional var authenticationData:Bytes;
 }
@@ -55,12 +55,12 @@ typedef ConnectBody = {
 }
 
 typedef PublishProperties = {
-	@:optional var payloadFormatIndicator:Bool;
+	@:optional var payloadFormatIndicator:Int;
 	@:optional var messageExpiryInterval:Int;
 	@:optional var topicAlias:Int;
 	@:optional var responseTopic:String;
 	@:optional var correlationData:Bytes;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 	@:optional var subscriptionIdentifier:Array<Int>;
 	@:optional var contentType:String;
 }
@@ -81,7 +81,7 @@ typedef ConnackProperties = {
 	@:optional var assignedClientIdentifier:String;
 	@:optional var topicAliasMaximum:Int;
 	@:optional var reasonString:String;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 	@:optional var wildcardSubscriptionAvailable:Bool;
 	@:optional var subscriptionIdentifiersAvailable:Bool;
 	@:optional var sharedSubscriptionAvailable:Bool;
@@ -108,7 +108,7 @@ typedef Subscription = {
 
 typedef SubscribeProperties = {
 	@:optional var subscriptionIdentifier:Int;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 }
 
 typedef SubscribeBody = {
@@ -128,6 +128,7 @@ typedef SubackBody = {
 typedef UnsubscribeProperties = SubscribeProperties;
 
 typedef UnsubscribeBody = {
+	var packetIdentifier:Int;
 	@:optional var properties:UnsubscribeProperties;
 	@:optional var unsubscriptions:Array<String>;
 }
@@ -169,18 +170,19 @@ typedef PubrecBody = {
 typedef DisconnectProperties = {
 	@:optional var sessionExpiryInterval:Int;
 	@:optional var reasonString:String;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 	@:optional var serverReference:String;
 }
 
 typedef DisconnectBody = {
+	@:optional var reasonCode:DisconnectReasonCode;
 	@:optional var properties:DisconnectProperties;
 }
 
 typedef AuthProperties = {
 	@:optional var authenticationMethod:String;
 	@:optional var authenticationData:Bytes;
-	@:optional var userProperties:Dynamic;
+	@:optional var userProperty:Dynamic;
 	@:optional var reasonString:String;
 }
 

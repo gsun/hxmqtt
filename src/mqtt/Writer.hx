@@ -1,76 +1,740 @@
 package mqtt;
 
+import mqtt.Constants;
+import mqtt.Data;
+import haxe.io.Bytes;
+
 class Writer {
 	var o:haxe.io.Output;
 	var p:MqttPacket;
+	var bits:format.tools.BitsOutput;
+
+	static var ptCls:Map<CtrlPktType, String> = [
+		Connect => "mqtt.ConnectWriter", Connack => "mqtt.ConnackWriter", Publish => "mqtt.PublishWriter", Puback => "mqtt.PubackWriter",
+		Pubrec => "mqtt.PubrecWriter", Pubrel => "mqtt.PubrelWriter", Pubcomp => "mqtt.PubcompWriter", Subscribe => "mqtt.SubscribeWriter",
+		Suback => "mqtt.SubackWriter", Unsubscribe => "mqtt.UnsubscribeWriter", Unsuback => "mqtt.UnsubackWriter", Disconnect => "mqtt.DisconnectWriter",
+		Auth => "mqtt.AuthWriter"
+	];
+	static var pkCls:Map<PropertyKind, String> = [
+		Connect => "mqtt.ConnectPropertiesWriter", Connack => "mqtt.ConnackPropertiesWriter", Publish => "mqtt.PublishPropertiesWriter",
+		Puback => "mqtt.PubackPropertiesWriter", Pubrec => "mqtt.PubrecPropertiesWriter", Pubrel => "mqtt.PubrelPropertiesWriter",
+		Pubcomp => "mqtt.PubcompPropertiesWriter", Subscribe => "mqtt.SubscribePropertiesWriter", Suback => "mqtt.SubackPropertiesWriter",
+		Unsubscribe => "mqtt.UnsubscribePropertiesWriter", Unsuback => "mqtt.UnsubackPropertiesWriter", Disconnect => "mqtt.DisconnectPropertiesWriter",
+		Auth => "mqtt.AuthPropertiesWriter", Will => "mqtt.WillPropertiesWriter"
+	];
 
 	public function new(o:haxe.io.Output) {
 		this.o = o;
 		o.bigEndian = true;
+		bits = new format.tools.BitsOutput(o);
 	}
 
-	function writeHeader() {}
+	inline function writeString(s:String) {
+		o.writeUInt16(s.length);
+		o.writeString(s, UTF8);
+	}
 
-	function writeBody() {
-		switch (p.pktType) {
-			case Connect:
-				writeConnectBody();
-			case Connack:
-				writeConnackBody();
-			case Publish:
-				writePublishBody();
-			case Puback:
-				writePubackBody();
-			case Pubrec:
-				writePubrecBody();
-			case Pubrel:
-				writePubrelBody();
-			case Pubcomp:
-				writePubcompBody();
-			case Subscribe:
-				writeSubscribeBody();
-			case Suback:
-				writeSubackBody();
-			case Unsubscribe:
-				writeUnsubscribeBody();
-			case Unsuback:
-				writeUnsubackBody();
-			case Disconnect:
-				writeDisconnectBody();
-			case Auth:
-				writeAuthBody();
+	inline function writeBinary(b:Bytes) {
+		o.writeUInt16(b.length);
+		o.write(b);
+	}
+
+	inline function writeByte(c:Int) {
+		o.writeByte(c);
+	}
+
+	inline function writeUInt16(x:Int) {
+		o.writeUInt16(x);
+	}
+
+	inline function writeInt32(x:Int) {
+		o.writeInt32(x);
+	}
+
+	function writeVariableByteInteger(x:Int) {
+		var y = x;
+		do {
+			var b = y % 128;
+			y = cast(y / 128);
+			if (y > 0)
+				b = b | 128;
+			o.writeByte(b);
+		} while (y > 0);
+	}
+
+	function writeHeader() {
+		bits.writeBits(4, p.pktType);
+		bits.writeBit(p.dup);
+		bits.writeBits(2, p.qos);
+		bits.writeBit(p.retain);
+	}
+
+	function writeProperties(pc:PropertyKind) {
+		var cl = Type.resolveClass(pkCls[pc]);
+		if (cl == null)
+			return;
+		var bo = new haxe.io.BytesOutput();
+		var writer = Type.createInstance(cl, [bo]);
+		try {
+			writer.write(p);
+			writeVariableByteInteger(bo.length);
+			o.write(bo.getBytes());
+		} catch (e) {
+			trace(e);
 		}
 	}
 
-	function writeConnectBody() {}
-
-	function writeConnackBody() {}
-
-	function writePublishBody() {}
-
-	function writePubackBody() {}
-
-	function writePubrecBody() {}
-
-	function writePubrelBody() {}
-
-	function writePubcompBody() {}
-
-	function writeSubscribeBody() {}
-
-	function writeSubackBody() {}
-
-	function writeUnsubscribeBody() {}
-
-	function writeUnsubackBody() {}
-
-	function writeDisconnectBody() {}
-
-	function writeAuthBody() {}
+	function writeBody() {
+		var cl = Type.resolveClass(ptCls[p.pktType]);
+		if (cl == null)
+			return;
+		var bo = new haxe.io.BytesOutput();
+		var writer = Type.createInstance(cl, [bo]);
+		try {
+			writer.write(p);
+			writeVariableByteInteger(bo.length);
+			o.write(bo.getBytes());
+		} catch (e) {
+			trace(e);
+		}
+	}
 
 	public function write(p:MqttPacket) {
 		this.p = p;
 		writeHeader();
 		writeBody();
+	}
+}
+
+class ConnectPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
+					writeVariableByteInteger(ConnectPropertyId.SessionExpiryInterval);
+					writeInt32(properties.sessionExpiryInterval);
+				}
+				if (Reflect.hasField(properties, "authenticationMethod")) {
+					writeVariableByteInteger(ConnectPropertyId.AuthenticationMethod);
+					writeString(properties.authenticationMethod);
+				}
+				if (Reflect.hasField(properties, "authenticationData")) {
+					writeVariableByteInteger(ConnectPropertyId.AuthenticationData);
+					writeBinary(properties.authenticationData);
+				}
+				if (Reflect.hasField(properties, "requestProblemInformation")) {
+					writeVariableByteInteger(ConnectPropertyId.RequestProblemInformation);
+					writeByte(properties.requestProblemInformation);
+				}
+				if (Reflect.hasField(properties, "requestResponseInformation")) {
+					writeVariableByteInteger(ConnectPropertyId.RequestResponseInformation);
+					writeByte(properties.requestResponseInformation);
+				}
+				if (Reflect.hasField(properties, "receiveMaximum")) {
+					writeVariableByteInteger(ConnectPropertyId.ReceiveMaximum);
+					writeUInt16(properties.receiveMaximum);
+				}
+				if (Reflect.hasField(properties, "topicAliasMaximum")) {
+					writeVariableByteInteger(ConnectPropertyId.TopicAliasMaximum);
+					writeUInt16(properties.topicAliasMaximum);
+				}
+				if (Reflect.hasField(properties, "maximumPacketSize")) {
+					writeVariableByteInteger(ConnectPropertyId.MaximumPacketSize);
+					writeInt32(properties.maximumPacketSize);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(ConnectPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class WillPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.will.properties;
+				if (Reflect.hasField(properties, "payloadFormatIndicator")) {
+					writeVariableByteInteger(WillPropertyId.PayloadFormatIndicator);
+					writeByte(properties.payloadFormatIndicator);
+				}
+				if (Reflect.hasField(properties, "messageExpiryInterval")) {
+					writeVariableByteInteger(WillPropertyId.MessageExpiryInterval);
+					writeInt32(properties.messageExpiryInterval);
+				}
+				if (Reflect.hasField(properties, "contentType")) {
+					writeVariableByteInteger(WillPropertyId.ContentType);
+					writeString(properties.contentType);
+				}
+				if (Reflect.hasField(properties, "responseTopic")) {
+					writeVariableByteInteger(WillPropertyId.ResponseTopic);
+					writeString(properties.responseTopic);
+				}
+				if (Reflect.hasField(properties, "correlationData")) {
+					writeVariableByteInteger(WillPropertyId.CorrelationData);
+					writeBinary(properties.correlationData);
+				}
+				if (Reflect.hasField(properties, "willDelayInterval")) {
+					writeVariableByteInteger(WillPropertyId.WillDelayInterval);
+					writeInt32(properties.willDelayInterval);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(WillPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class ConnectWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		var userNameFlag = Reflect.hasField(b, "username");
+		var passwordFlag = Reflect.hasField(b, "password");
+		var willFlag = Reflect.hasField(b, "will");
+		writeString(b.protocolName);
+		writeByte(b.protocolVersion);
+		bits.writeBit(userNameFlag);
+		bits.writeBit(passwordFlag);
+		bits.writeBit(willFlag ? b.will.retain : false);
+		bits.writeBits(2, willFlag ? b.will.qos : 0);
+		bits.writeBit(willFlag ? true : false);
+		bits.writeBit(b.cleanStart);
+		bits.writeBit(false);
+		writeUInt16(b.keepAlive);
+		writeProperties(PropertyKind.Connect);
+		writeString(b.clientId);
+		if (willFlag)
+			writeProperties(PropertyKind.Will);
+		if (willFlag)
+			writeString(b.will.topic);
+		if (willFlag)
+			writeBinary(b.will.payload);
+		if (userNameFlag)
+			writeString(b.userName);
+		if (passwordFlag)
+			writeBinary(b.password);
+	}
+}
+
+class ConnackPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
+					writeVariableByteInteger(ConnackPropertyId.SessionExpiryInterval);
+					writeInt32(properties.sessionExpiryInterval);
+				}
+				if (Reflect.hasField(properties, "assignedClientIdentifier")) {
+					writeVariableByteInteger(ConnackPropertyId.AssignedClientIdentifier);
+					writeString(properties.assignedClientIdentifier);
+				}
+				if (Reflect.hasField(properties, "serverKeepAlive")) {
+					writeVariableByteInteger(ConnackPropertyId.ServerKeepAlive);
+					writeUInt16(properties.serverKeepAlive);
+				}
+				if (Reflect.hasField(properties, "authenticationMethod")) {
+					writeVariableByteInteger(ConnackPropertyId.AuthenticationMethod);
+					writeString(properties.authenticationMethod);
+				}
+				if (Reflect.hasField(properties, "authenticationData")) {
+					writeVariableByteInteger(ConnackPropertyId.AuthenticationData);
+					writeBinary(properties.authenticationData);
+				}
+				if (Reflect.hasField(properties, "responseInformation")) {
+					writeVariableByteInteger(ConnackPropertyId.ResponseInformation);
+					writeString(properties.responseInformation);
+				}
+				if (Reflect.hasField(properties, "serverReference")) {
+					writeVariableByteInteger(ConnackPropertyId.ServerReference);
+					writeString(properties.serverReference);
+				}
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(ConnackPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "receiveMaximum")) {
+					writeVariableByteInteger(ConnackPropertyId.ReceiveMaximum);
+					writeUInt16(properties.receiveMaximum);
+				}
+				if (Reflect.hasField(properties, "topicAliasMaximum")) {
+					writeVariableByteInteger(ConnackPropertyId.TopicAliasMaximum);
+					writeUInt16(properties.topicAliasMaximum);
+				}
+				if (Reflect.hasField(properties, "maximumQoS")) {
+					writeVariableByteInteger(ConnackPropertyId.MaximumQoS);
+					writeByte(properties.maximumQoS);
+				}
+				if (Reflect.hasField(properties, "retainAvailable")) {
+					writeVariableByteInteger(ConnackPropertyId.RetainAvailable);
+					writeByte(properties.retainAvailable);
+				}
+				if (Reflect.hasField(properties, "maximumPacketSize")) {
+					writeVariableByteInteger(ConnackPropertyId.MaximumPacketSize);
+					writeInt32(properties.maximumPacketSize);
+				}
+				if (Reflect.hasField(properties, "wildcardSubscriptionAvailable")) {
+					writeVariableByteInteger(ConnackPropertyId.WildcardSubscriptionAvailable);
+					writeByte(properties.wildcardSubscriptionAvailable);
+				}
+				if (Reflect.hasField(properties, "subscriptionIdentifierAvailable")) {
+					writeVariableByteInteger(ConnackPropertyId.SubscriptionIdentifierAvailable);
+					writeByte(properties.subscriptionIdentifierAvailable);
+				}
+				if (Reflect.hasField(properties, "sharedSubscriptionAvailabe")) {
+					writeVariableByteInteger(ConnackPropertyId.SharedSubscriptionAvailabe);
+					writeByte(properties.sharedSubscriptionAvailabe);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(ConnackPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class ConnackWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		bits.writeBits(7, 0);
+		bits.writeBit(b.sessionPresent);
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Connack);
+	}
+}
+
+class PublishPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties:PublishProperties = cast p.body.properties;
+				if (Reflect.hasField(properties, "payloadFormatIndicator")) {
+					writeVariableByteInteger(PublishPropertyId.PayloadFormatIndicator);
+					writeByte(properties.payloadFormatIndicator);
+				}
+				if (Reflect.hasField(properties, "messageExpiryInterval")) {
+					writeVariableByteInteger(PublishPropertyId.MessageExpiryInterval);
+					writeInt32(properties.messageExpiryInterval);
+				}
+				if (Reflect.hasField(properties, "contentType")) {
+					writeVariableByteInteger(PublishPropertyId.ContentType);
+					writeString(properties.contentType);
+				}
+				if (Reflect.hasField(properties, "responseTopic")) {
+					writeVariableByteInteger(PublishPropertyId.ResponseTopic);
+					writeString(properties.responseTopic);
+				}
+				if (Reflect.hasField(properties, "correlationData")) {
+					writeVariableByteInteger(PublishPropertyId.CorrelationData);
+					writeBinary(properties.correlationData);
+				}
+				if (Reflect.hasField(properties, "topicAlias")) {
+					writeVariableByteInteger(PublishPropertyId.TopicAlias);
+					writeUInt16(properties.topicAlias);
+				}
+				if (Reflect.hasField(properties, "subscriptionIdentifier")) {
+					writeVariableByteInteger(PublishPropertyId.SubscriptionIdentifier);
+					for (i in properties.subscriptionIdentifier) {
+						writeVariableByteInteger(i);
+					}
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(PublishPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class PublishWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeString(b.topic);
+		writeUInt16(b.packetIdentifier);
+		writeProperties(PropertyKind.Publish);
+	}
+}
+
+class PubackPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(PubackPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(PubackPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class PubackWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeUInt16(b.packetIdentifier);
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Puback);
+	}
+}
+
+class PubrecPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(PubrecPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(PubrecPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class PubrecWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeUInt16(b.packetIdentifier);
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Pubrec);
+	}
+}
+
+class PubrelPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(PubrelPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(PubrelPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class PubrelWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeUInt16(b.packetIdentifier);
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Pubrel);
+	}
+}
+
+class PubcompPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(PubcompPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(PubcompPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class PubcompWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeUInt16(b.packetIdentifier);
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Pubcomp);
+	}
+}
+
+class SubscribePropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "subscriptionIdentifier")) {
+					writeVariableByteInteger(SubscribePropertyId.SubscriptionIdentifier);
+					writeVariableByteInteger(properties.subscriptionIdentifier);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(SubscribePropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class SubscribeWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b:SubscribeBody = cast p.body;
+		writeUInt16(b.packetIdentifier);
+		writeProperties(PropertyKind.Subscribe);
+		for (s in b.subscriptions) {
+			writeString(s.topic);
+			bits.writeBits(2, 0);
+			bits.writeBits(2, s.rh);
+			bits.writeBit(s.rap);
+			bits.writeBit(s.nl);
+			bits.writeBits(2, s.qos);
+		}
+	}
+}
+
+class SubackPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(SubackPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(SubackPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class SubackWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b:SubackBody = cast p.body;
+		writeUInt16(b.packetIdentifier);
+		writeProperties(PropertyKind.Suback);
+		for (g in b.granted) {
+			writeByte(g);
+		}
+	}
+}
+
+class UnsubscribePropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(UnsubscribePropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class UnsubscribeWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b:UnsubscribeBody = cast p.body;
+		writeUInt16(b.packetIdentifier);
+		writeProperties(PropertyKind.Unsubscribe);
+		for (g in b.unsubscriptions) {
+			writeString(g);
+		}
+	}
+}
+
+class UnsubackPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(UnsubackPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(UnsubackPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class UnsubackWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b:UnsubackBody = cast p.body;
+		writeUInt16(b.packetIdentifier);
+		writeProperties(PropertyKind.Unsuback);
+		for (g in b.granted) {
+			writeByte(g);
+		}
+	}
+}
+
+class AuthPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "authenticationMethod")) {
+					writeVariableByteInteger(AuthPropertyId.AuthenticationMethod);
+					writeString(properties.authenticationMethod);
+				}
+				if (Reflect.hasField(properties, "authenticationData")) {
+					writeVariableByteInteger(AuthPropertyId.AuthenticationData);
+					writeBinary(properties.authenticationData);
+				}
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(AuthPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(AuthPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class AuthWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Auth);
+	}
+}
+
+class DisconnectPropertiesWriter extends Writer {
+	override function write(p:MqttPacket) {
+		try {
+			if (Reflect.hasField(p.body, "properties")) {
+				var properties = p.body.properties;
+				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
+					writeVariableByteInteger(DisconnectPropertyId.SessionExpiryInterval);
+					writeInt32(properties.sessionExpiryInterval);
+				}
+				if (Reflect.hasField(properties, "serverReference")) {
+					writeVariableByteInteger(DisconnectPropertyId.ServerReference);
+					writeString(properties.serverReference);
+				}
+				if (Reflect.hasField(properties, "reasonString")) {
+					writeVariableByteInteger(DisconnectPropertyId.ReasonString);
+					writeString(properties.reasonString);
+				}
+				if (Reflect.hasField(properties, "userProperty")) {
+					writeVariableByteInteger(DisconnectPropertyId.UserProperty);
+					var userProperty = properties.userProperty;
+					for (f in Reflect.fields(userProperty)) {
+						writeString(f);
+						writeString(Reflect.field(userProperty, f));
+					}
+				}
+			}
+		} catch (e) {
+			trace(e);
+		}
+	}
+}
+
+class DisconnectWriter extends Writer {
+	override public function write(p:MqttPacket) {
+		var b = p.body;
+		writeByte(b.reasonCode);
+		writeProperties(PropertyKind.Disconnect);
 	}
 }

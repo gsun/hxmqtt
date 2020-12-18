@@ -58,7 +58,7 @@ enum abstract PropertyId(Int) from Int to Int {
 	var topicAlias = 35;
 	var maximumQoS = 36;
 	var retainAvailable = 37;
-	var userProperties = 38;
+	var userProperty = 38;
 	var maximumPacketSize = 39;
 	var wildcardSubscriptionAvailable = 40;
 	var subscriptionIdentifiersAvailable = 41;

@@ -6,6 +6,7 @@ import haxe.io.BytesBuffer;
 import haxe.crypto.BaseCode;
 import mqtt.Constants;
 import mqtt.Reader;
+import mqtt.Writer;
 import mqtt.Data;
 
 // test case from mqtt-packet, https://github.com/mqttjs/mqtt-packet/
