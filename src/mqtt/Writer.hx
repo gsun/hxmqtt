@@ -111,7 +111,7 @@ class Writer {
 class ConnectPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
 					writeVariableByteInteger(ConnectPropertyId.SessionExpiryInterval);
@@ -163,7 +163,7 @@ class ConnectPropertiesWriter extends Writer {
 class WillPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.will.properties != null) {
 				var properties = p.body.will.properties;
 				if (Reflect.hasField(properties, "payloadFormatIndicator")) {
 					writeVariableByteInteger(WillPropertyId.PayloadFormatIndicator);
@@ -239,7 +239,7 @@ class ConnectWriter extends Writer {
 class ConnackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
 					writeVariableByteInteger(ConnackPropertyId.SessionExpiryInterval);
@@ -334,7 +334,7 @@ class ConnackWriter extends Writer {
 class PublishPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties:PublishProperties = cast p.body.properties;
 				if (Reflect.hasField(properties, "payloadFormatIndicator")) {
 					writeVariableByteInteger(PublishPropertyId.PayloadFormatIndicator);
@@ -395,7 +395,7 @@ class PublishWriter extends Writer {
 class PubackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "reasonString")) {
 					writeVariableByteInteger(PubackPropertyId.ReasonString);
@@ -429,7 +429,7 @@ class PubackWriter extends Writer {
 class PubrecPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "reasonString")) {
 					writeVariableByteInteger(PubrecPropertyId.ReasonString);
@@ -463,7 +463,7 @@ class PubrecWriter extends Writer {
 class PubrelPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "reasonString")) {
 					writeVariableByteInteger(PubrelPropertyId.ReasonString);
@@ -497,7 +497,7 @@ class PubrelWriter extends Writer {
 class PubcompPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "reasonString")) {
 					writeVariableByteInteger(PubcompPropertyId.ReasonString);
@@ -531,7 +531,7 @@ class PubcompWriter extends Writer {
 class SubscribePropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "subscriptionIdentifier")) {
 					writeVariableByteInteger(SubscribePropertyId.SubscriptionIdentifier);
@@ -572,7 +572,7 @@ class SubscribeWriter extends Writer {
 class SubackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "reasonString")) {
 					writeVariableByteInteger(SubackPropertyId.ReasonString);
@@ -608,7 +608,7 @@ class SubackWriter extends Writer {
 class UnsubscribePropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "userProperty")) {
 					var userProperty = properties.userProperty;
@@ -640,7 +640,7 @@ class UnsubscribeWriter extends Writer {
 class UnsubackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "reasonString")) {
 					writeVariableByteInteger(UnsubackPropertyId.ReasonString);
@@ -676,7 +676,7 @@ class UnsubackWriter extends Writer {
 class AuthPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties = p.body.properties;
 				if (Reflect.hasField(properties, "authenticationMethod")) {
 					writeVariableByteInteger(AuthPropertyId.AuthenticationMethod);
@@ -717,7 +717,7 @@ class AuthWriter extends Writer {
 class DisconnectPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
 		try {
-			if (Reflect.hasField(p.body, "properties")) {
+			if (p.body.properties != null) {
 				var properties:DisconnectProperties = cast p.body.properties;
 				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
 					writeVariableByteInteger(DisconnectPropertyId.SessionExpiryInterval);
