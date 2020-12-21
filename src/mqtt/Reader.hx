@@ -14,13 +14,6 @@ class Reader {
 		Suback => "mqtt.SubackReader", Unsubscribe => "mqtt.UnsubscribeReader", Unsuback => "mqtt.UnsubackReader", Disconnect => "mqtt.DisconnectReader",
 		Auth => "mqtt.AuthReader"
 	];
-	static var pkCls:Map<PropertyKind, String> = [
-		Connect => "mqtt.ConnectPropertiesReader", Connack => "mqtt.ConnackPropertiesReader", Publish => "mqtt.PublishPropertiesReader",
-		Puback => "mqtt.PubackPropertiesReader", Pubrec => "mqtt.PubrecPropertiesReader", Pubrel => "mqtt.PubrelPropertiesReader",
-		Pubcomp => "mqtt.PubcompPropertiesReader", Subscribe => "mqtt.SubscribePropertiesReader", Suback => "mqtt.SubackPropertiesReader",
-		Unsubscribe => "mqtt.UnsubscribePropertiesReader", Unsuback => "mqtt.UnsubackPropertiesReader", Disconnect => "mqtt.DisconnectPropertiesReader",
-		Auth => "mqtt.AuthPropertiesReader", Will => "mqtt.WillPropertiesReader"
-	];
 
 	public function new(i) {
 		this.i = i;
@@ -101,11 +94,7 @@ class Reader {
 		return bo;
 	}
 
-	function readProperties(pc:PropertyKind) {
-		var cl = Type.resolveClass(pkCls[pc]);
-		if (cl == null)
-			return {};
-
+	function readProperties<T:Reader>(cl:Class<T>) {
 		var length = readVariableByteInteger();
 		if (length == 0)
 			return null;
@@ -231,9 +220,9 @@ class ConnectReader extends Reader {
 			throw new MqttReaderException('Invalid MQTT name ${protocolName}.');
 		if (protocolVersion != ProtocolVersion.V5)
 			throw new MqttReaderException('Invalid MQTT version ${protocolVersion}.');
-		var connectPorperties:ConnectProperties = cast readProperties(PropertyKind.Connect);
+		var connectPorperties:ConnectProperties = cast readProperties(ConnectPropertiesReader);
 		var clientId = readString();
-		var willProperties:WillProperties = (willFlag) ? cast readProperties(PropertyKind.Will) : null;
+		var willProperties:WillProperties = (willFlag) ? cast readProperties(WillPropertiesReader) : null;
 		var willTopic = (willFlag) ? readString() : null;
 		var willPayload = (willFlag) ? readBinary() : null;
 		var userName = (userNameFlag) ? readString() : null;
@@ -322,7 +311,7 @@ class ConnackReader extends Reader {
 		var ea = AbstractEnumTools.getValues(ConnackReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid connack reason code ${reasonCode}.');
-		var properties:ConnackProperties = cast readProperties(PropertyKind.Connack);
+		var properties:ConnackProperties = cast readProperties(ConnackPropertiesReader);
 		return {
 			reasonCode: reasonCode,
 			sessionPresent: sessionPresent,
@@ -376,7 +365,7 @@ class PublishReader extends Reader {
 	override public function read():PublishBody {
 		var topic = readString();
 		var packetIdentifier = readUInt16();
-		var properties:PublishProperties = cast readProperties(PropertyKind.Publish);
+		var properties:PublishProperties = cast readProperties(PublishPropertiesReader);
 		var payload = i.readAll();
 		return {
 			topic: topic,
@@ -420,7 +409,7 @@ class PubackReader extends Reader {
 		var ea = AbstractEnumTools.getValues(PubackReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid puback reason code ${reasonCode}.');
-		var properties:PubackProperties = cast readProperties(PropertyKind.Puback);
+		var properties:PubackProperties = cast readProperties(PubackPropertiesReader);
 		return {
 			packetIdentifier: packetIdentifier,
 			reasonCode: reasonCode,
@@ -461,7 +450,7 @@ class PubrecReader extends Reader {
 		var ea = AbstractEnumTools.getValues(PubrecReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid pubrec reason code ${reasonCode}.');
-		var properties:PubrecProperties = cast readProperties(PropertyKind.Pubrec);
+		var properties:PubrecProperties = cast readProperties(PubrecPropertiesReader);
 		return {
 			packetIdentifier: packetIdentifier,
 			reasonCode: reasonCode,
@@ -503,7 +492,7 @@ class PubrelReader extends Reader {
 		var ea = AbstractEnumTools.getValues(PubrelReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid pubrel reason code ${reasonCode}.');
-		var properties:PubrelProperties = cast readProperties(PropertyKind.Pubrel);
+		var properties:PubrelProperties = cast readProperties(PubrelPropertiesReader);
 		return {
 			packetIdentifier: packetIdentifier,
 			reasonCode: reasonCode,
@@ -544,7 +533,7 @@ class PubcompReader extends Reader {
 		var ea = AbstractEnumTools.getValues(PubcompReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid pubcomp reason code ${reasonCode}.');
-		var properties:PubcompProperties = cast readProperties(PropertyKind.Pubcomp);
+		var properties:PubcompProperties = cast readProperties(PubcompPropertiesReader);
 		return {
 			packetIdentifier: packetIdentifier,
 			reasonCode: reasonCode,
@@ -581,7 +570,7 @@ class SubscribePropertiesReader extends Reader {
 class SubscribeReader extends Reader {
 	override public function read():SubscribeBody {
 		var packetIdentifier = readUInt16();
-		var properties:SubscribeProperties = cast readProperties(PropertyKind.Subscribe);
+		var properties:SubscribeProperties = cast readProperties(SubscribePropertiesReader);
 		var subscriptions:Array<Subscription> = [];
 		try {
 			while (!eof()) {
@@ -638,7 +627,7 @@ class SubackPropertiesReader extends Reader {
 class SubackReader extends Reader {
 	override public function read():SubackBody {
 		var packetIdentifier = readUInt16();
-		var properties:SubackProperties = cast readProperties(PropertyKind.Suback);
+		var properties:SubackProperties = cast readProperties(SubackPropertiesReader);
 		var granted:Array<SubackReasonCode> = [];
 		try {
 			while (!eof()) {
@@ -685,7 +674,7 @@ class UnsubscribePropertiesReader extends Reader {
 class UnsubscribeReader extends Reader {
 	override public function read():UnsubscribeBody {
 		var packetIdentifier = readUInt16();
-		var properties:UnsubscribeProperties = cast readProperties(PropertyKind.Unsubscribe);
+		var properties:UnsubscribeProperties = cast readProperties(UnsubscribePropertiesReader);
 		var unsubscriptions:Array<String> = [];
 		try {
 			while (!eof()) {
@@ -731,8 +720,8 @@ class UnsubackPropertiesReader extends Reader {
 class UnsubackReader extends Reader {
 	override public function read():UnsubackBody {
 		var packetIdentifier = readUInt16();
-		var properties:UnsubackProperties = cast readProperties(PropertyKind.Unsuback);
-		var granted:Array<SubackReasonCode> = [];
+		var properties:UnsubackProperties = cast readProperties(UnsubackPropertiesReader);
+		var granted:Array<UnsubackReasonCode> = [];
 		try {
 			while (!eof()) {
 				var reasonCode = readByte();
@@ -787,7 +776,7 @@ class AuthReader extends Reader {
 		var ea = AbstractEnumTools.getValues(AuthReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid auth reason code ${reasonCode}.');
-		var properties:AuthProperties = cast readProperties(PropertyKind.Auth);
+		var properties:AuthProperties = cast readProperties(AuthPropertiesReader);
 		return {reasonCode: reasonCode, properties: properties};
 	}
 }
@@ -827,7 +816,7 @@ class DisconnectReader extends Reader {
 		var ea = AbstractEnumTools.getValues(DisconnectReasonCode);
 		if (!ea.contains(reasonCode))
 			throw new MqttReaderException('Invalid disconnect reason code ${reasonCode}.');
-		var properties:DisconnectProperties = cast readProperties(PropertyKind.Disconnect);
+		var properties:DisconnectProperties = cast readProperties(DisconnectPropertiesReader);
 		return {reasonCode: reasonCode, properties: properties};
 	}
 }
