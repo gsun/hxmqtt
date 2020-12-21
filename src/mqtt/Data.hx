@@ -152,18 +152,24 @@ typedef PubackBody = {
 typedef PubcompProperties = SubscribeProperties;
 
 typedef PubcompBody = {
+	var packetIdentifier:Int;
+	var reasonCode:PubackReasonCode;
 	@:optional var properties:PubcompProperties;
 }
 
 typedef PubrelProperties = SubscribeProperties;
 
 typedef PubrelBody = {
+	var packetIdentifier:Int;
+	var reasonCode:PubackReasonCode;
 	@:optional var properties:PubrelProperties;
 }
 
 typedef PubrecProperties = SubscribeProperties;
 
 typedef PubrecBody = {
+	var packetIdentifier:Int;
+	var reasonCode:PubackReasonCode;
 	@:optional var properties:PubrecProperties;
 }
 
