@@ -15,13 +15,6 @@ class Writer {
 		Suback => "mqtt.SubackWriter", Unsubscribe => "mqtt.UnsubscribeWriter", Unsuback => "mqtt.UnsubackWriter", Disconnect => "mqtt.DisconnectWriter",
 		Auth => "mqtt.AuthWriter", Pingreq => "mqtt.PingreqWriter", Pingresp => "mqtt.PingrespWriter"
 	];
-	static var pkCls:Map<PropertyKind, String> = [
-		Connect => "mqtt.ConnectPropertiesWriter", Connack => "mqtt.ConnackPropertiesWriter", Publish => "mqtt.PublishPropertiesWriter",
-		Puback => "mqtt.PubackPropertiesWriter", Pubrec => "mqtt.PubrecPropertiesWriter", Pubrel => "mqtt.PubrelPropertiesWriter",
-		Pubcomp => "mqtt.PubcompPropertiesWriter", Subscribe => "mqtt.SubscribePropertiesWriter", Suback => "mqtt.SubackPropertiesWriter",
-		Unsubscribe => "mqtt.UnsubscribePropertiesWriter", Unsuback => "mqtt.UnsubackPropertiesWriter", Disconnect => "mqtt.DisconnectPropertiesWriter",
-		Auth => "mqtt.AuthPropertiesWriter", Will => "mqtt.WillPropertiesWriter"
-	];
 
 	public function new(o:haxe.io.Output) {
 		this.o = o;
@@ -69,10 +62,7 @@ class Writer {
 		bits.writeBit(p.retain);
 	}
 
-	function writeProperties(pc:PropertyKind) {
-		var cl = Type.resolveClass(pkCls[pc]);
-		if (cl == null)
-			return;
+	function writeProperties<T:Writer>(cl:Class<T>) {
 		var bo = new haxe.io.BytesOutput();
 		var writer = Type.createInstance(cl, [bo]);
 		try {
@@ -221,10 +211,10 @@ class ConnectWriter extends Writer {
 		bits.writeBit(b.cleanStart);
 		bits.writeBit(false);
 		writeUInt16(b.keepAlive);
-		writeProperties(PropertyKind.Connect);
+		writeProperties(ConnectPropertiesWriter);
 		writeString(b.clientId);
 		if (willFlag)
-			writeProperties(PropertyKind.Will);
+			writeProperties(WillPropertiesWriter);
 		if (willFlag)
 			writeString(b.will.topic);
 		if (willFlag)
@@ -327,7 +317,7 @@ class ConnackWriter extends Writer {
 		bits.writeBits(7, 0);
 		bits.writeBit(b.sessionPresent);
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Connack);
+		writeProperties(ConnackPropertiesWriter);
 	}
 }
 
@@ -387,7 +377,7 @@ class PublishWriter extends Writer {
 		var b = p.body;
 		writeString(b.topic);
 		writeUInt16(b.packetIdentifier);
-		writeProperties(PropertyKind.Publish);
+		writeProperties(PublishPropertiesWriter);
 		o.write(b.payload);
 	}
 }
@@ -422,7 +412,7 @@ class PubackWriter extends Writer {
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Puback);
+		writeProperties(PubackPropertiesWriter);
 	}
 }
 
@@ -456,7 +446,7 @@ class PubrecWriter extends Writer {
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Pubrec);
+		writeProperties(PubrecPropertiesWriter);
 	}
 }
 
@@ -490,7 +480,7 @@ class PubrelWriter extends Writer {
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Pubrel);
+		writeProperties(PubrelPropertiesWriter);
 	}
 }
 
@@ -524,7 +514,7 @@ class PubcompWriter extends Writer {
 		var b = p.body;
 		writeUInt16(b.packetIdentifier);
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Pubcomp);
+		writeProperties(PubcompPropertiesWriter);
 	}
 }
 
@@ -557,7 +547,7 @@ class SubscribeWriter extends Writer {
 		this.p = p;
 		var b:SubscribeBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
-		writeProperties(PropertyKind.Subscribe);
+		writeProperties(SubscribePropertiesWriter);
 		for (s in b.subscriptions) {
 			writeString(s.topic);
 			bits.writeBits(2, 0);
@@ -598,7 +588,7 @@ class SubackWriter extends Writer {
 		this.p = p;
 		var b:SubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
-		writeProperties(PropertyKind.Suback);
+		writeProperties(SubackPropertiesWriter);
 		for (g in b.granted) {
 			writeByte(g);
 		}
@@ -630,7 +620,7 @@ class UnsubscribeWriter extends Writer {
 		this.p = p;
 		var b:UnsubscribeBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
-		writeProperties(PropertyKind.Unsubscribe);
+		writeProperties(UnsubscribePropertiesWriter);
 		for (g in b.unsubscriptions) {
 			writeString(g);
 		}
@@ -666,7 +656,7 @@ class UnsubackWriter extends Writer {
 		this.p = p;
 		var b:UnsubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
-		writeProperties(PropertyKind.Unsuback);
+		writeProperties(UnsubackPropertiesWriter);
 		for (g in b.granted) {
 			writeByte(g);
 		}
@@ -710,7 +700,7 @@ class AuthWriter extends Writer {
 		this.p = p;
 		var b = p.body;
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Auth);
+		writeProperties(AuthPropertiesWriter);
 	}
 }
 
@@ -751,7 +741,7 @@ class DisconnectWriter extends Writer {
 		this.p = p;
 		var b = p.body;
 		writeByte(b.reasonCode);
-		writeProperties(PropertyKind.Disconnect);
+		writeProperties(DisconnectPropertiesWriter);
 	}
 }
 
