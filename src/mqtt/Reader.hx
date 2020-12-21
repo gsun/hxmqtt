@@ -128,63 +128,64 @@ class Reader {
 
 class ConnectPropertiesReader extends Reader {
 	override function read():ConnectProperties {
-		var p = {};
+		var p:ConnectProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case ConnectPropertyId.SessionExpiryInterval:
-						Reflect.setField(p, "sessionExpiryInterval", readInt32());
+						p.sessionExpiryInterval = readInt32();
 					case ConnectPropertyId.AuthenticationMethod:
-						Reflect.setField(p, "authenticationMethod", readString());
+						p.authenticationMethod = readString();
 					case ConnectPropertyId.AuthenticationData:
-						Reflect.setField(p, "authenticationData", readBinary());
+						p.authenticationData = readBinary();
 					case ConnectPropertyId.RequestProblemInformation:
-						Reflect.setField(p, "requestProblemInformation", readByte());
+						p.requestProblemInformation = (readByte() == 0) ? false : true;
 					case ConnectPropertyId.RequestResponseInformation:
-						Reflect.setField(p, "requestResponseInformation", readByte());
+						p.requestResponseInformation = (readByte() == 0) ? false : true;
 					case ConnectPropertyId.ReceiveMaximum:
-						Reflect.setField(p, "receiveMaximum", readUInt16());
+						p.receiveMaximum = readUInt16();
 					case ConnectPropertyId.TopicAliasMaximum:
-						Reflect.setField(p, "topicAliasMaximum", readUInt16());
+						p.topicAliasMaximum = readUInt16();
 					case ConnectPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					case ConnectPropertyId.MaximumPacketSize:
-						Reflect.setField(p, "maximumPacketSize", readInt32());
+						p.maximumPacketSize = readInt32();
 					default:
 						throw new MqttReaderException('Invalid connect property id ${propertyId}.');
 				}
 			}
 		} catch (e) {
 			trace(e);
+			return null;
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
 
 class WillPropertiesReader extends Reader {
 	override function read():WillProperties {
-		var p = {};
+		var p:WillProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case WillPropertyId.PayloadFormatIndicator:
-						Reflect.setField(p, "payloadFormatIndicator", readByte());
+						p.payloadFormatIndicator = readByte();
 					case WillPropertyId.MessageExpiryInterval:
-						Reflect.setField(p, "messageExpiryInterval", readInt32());
+						p.messageExpiryInterval = readInt32();
 					case WillPropertyId.ContentType:
-						Reflect.setField(p, "contentType", readString());
+						p.contentType = readString();
 					case WillPropertyId.ResponseTopic:
-						Reflect.setField(p, "responseTopic", readString());
+						p.responseTopic = readString();
 					case WillPropertyId.CorrelationData:
-						Reflect.setField(p, "correlationData", readBinary());
+						p.correlationData = readBinary();
 					case WillPropertyId.WillDelayInterval:
-						Reflect.setField(p, "willDelayInterval", readInt32());
+						p.willDelayInterval = readInt32();
 					case WillPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -193,9 +194,10 @@ class WillPropertiesReader extends Reader {
 			}
 		} catch (e) {
 			trace(e);
+			return null;
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -246,55 +248,56 @@ class ConnectReader extends Reader {
 
 class ConnackPropertiesReader extends Reader {
 	override function read():ConnackProperties {
-		var p = {};
+		var p:ConnackProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case ConnackPropertyId.SessionExpiryInterval:
-						Reflect.setField(p, "sessionExpiryInterval", readInt32());
+						p.sessionExpiryInterval = readInt32();
 					case ConnackPropertyId.AssignedClientIdentifier:
-						Reflect.setField(p, "assignedClientIdentifier", readString());
+						p.assignedClientIdentifier = readString();
 					case ConnackPropertyId.ServerKeepAlive:
-						Reflect.setField(p, "serverKeepAlive", readUInt16());
+						p.serverKeepAlive = readUInt16();
 					case ConnackPropertyId.AuthenticationMethod:
-						Reflect.setField(p, "authenticationMethod", readString());
+						p.authenticationMethod = readString();
 					case ConnackPropertyId.AuthenticationData:
-						Reflect.setField(p, "authenticationData", readBinary());
+						p.authenticationData = readBinary();
 					case ConnackPropertyId.ResponseInformation:
-						Reflect.setField(p, "responseInformation", readString());
+						p.responseInformation = readString();
 					case ConnackPropertyId.ServerReference:
-						Reflect.setField(p, "serverReference", readString());
+						p.serverReference = readString();
 					case ConnackPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case ConnackPropertyId.ReceiveMaximum:
-						Reflect.setField(p, "receiveMaximum", readUInt16());
+						p.receiveMaximum = readUInt16();
 					case ConnackPropertyId.TopicAliasMaximum:
-						Reflect.setField(p, "topicAliasMaximum", readUInt16());
+						p.topicAliasMaximum = readUInt16();
 					case ConnackPropertyId.MaximumQoS:
-						Reflect.setField(p, "maximumQoS", readByte());
+						p.maximumQoS = readByte();
 					case ConnackPropertyId.RetainAvailable:
-						Reflect.setField(p, "retainAvailable", readByte());
+						p.retainAvailable = (readByte() == 0) ? false : true;
 					case ConnackPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					case ConnackPropertyId.MaximumPacketSize:
-						Reflect.setField(p, "maximumPacketSize", readInt32());
+						p.maximumPacketSize = readInt32();
 					case ConnackPropertyId.WildcardSubscriptionAvailable:
-						Reflect.setField(p, "wildcardSubscriptionAvailable", readByte());
+						p.wildcardSubscriptionAvailable = (readByte() == 0) ? false : true;
 					case ConnackPropertyId.SubscriptionIdentifierAvailable:
-						Reflect.setField(p, "subscriptionIdentifierAvailable", readByte());
-					case ConnackPropertyId.SharedSubscriptionAvailabe:
-						Reflect.setField(p, "sharedSubscriptionAvailabe", readByte());
+						p.subscriptionIdentifierAvailable = (readByte() == 0) ? false : true;
+					case ConnackPropertyId.SharedSubscriptionAvailable:
+						p.sharedSubscriptionAvailable = (readByte() == 0) ? false : true;
 					default:
 						throw new MqttReaderException('Invalid connack property id ${propertyId}.');
 				}
 			}
 		} catch (e) {
 			trace(e);
+			return null;
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -318,7 +321,7 @@ class ConnackReader extends Reader {
 
 class PublishPropertiesReader extends Reader {
 	override function read():PublishProperties {
-		var p = {};
+		var p:PublishProperties = {};
 		var u = {};
 		var i = new Array<Int>();
 		try {
@@ -326,33 +329,33 @@ class PublishPropertiesReader extends Reader {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PublishPropertyId.PayloadFormatIndicator:
-						Reflect.setField(p, "payloadFormatIndicator", readByte());
+						p.payloadFormatIndicator = readByte();
 					case PublishPropertyId.MessageExpiryInterval:
-						Reflect.setField(p, "messageExpiryInterval", readInt32());
+						p.messageExpiryInterval = readInt32();
 					case PublishPropertyId.ContentType:
-						Reflect.setField(p, "contentType", readString());
+						p.contentType = readString();
 					case PublishPropertyId.ResponseTopic:
-						Reflect.setField(p, "responseTopic", readString());
+						p.responseTopic = readString();
 					case PublishPropertyId.CorrelationData:
-						Reflect.setField(p, "correlationData", readBinary());
+						p.correlationData = readBinary();
 					case PublishPropertyId.SubscriptionIdentifier:
 						i.push(readVariableByteInteger());
 					case PublishPropertyId.TopicAlias:
-						Reflect.setField(p, "topicAlias", readUInt16());
+						p.topicAlias = readUInt16();
 					case PublishPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
-
 					default:
 						throw new MqttReaderException('Invalid publish property id ${propertyId}.');
 				}
 			}
 		} catch (e) {
 			trace(e);
+			return null;
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		if (i.length > 0)
-			Reflect.setField(p, "subscriptionIdentifier", i);
+			p.subscriptionIdentifier = i;
 		return p;
 	}
 }
@@ -374,14 +377,14 @@ class PublishReader extends Reader {
 
 class PubackPropertiesReader extends Reader {
 	override public function read():PubackProperties {
-		var p = {};
+		var p:PubackProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubackPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case PubackPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 
@@ -393,7 +396,7 @@ class PubackPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -416,14 +419,14 @@ class PubackReader extends Reader {
 
 class PubrecPropertiesReader extends Reader {
 	override public function read():PubrecProperties {
-		var p = {};
+		var p:PubrecProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubrecPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case PubrecPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -434,7 +437,7 @@ class PubrecPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -457,14 +460,14 @@ class PubrecReader extends Reader {
 
 class PubrelPropertiesReader extends Reader {
 	override public function read():PubrelProperties {
-		var p = {};
+		var p:PubrelProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubrelPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case PubrelPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 
@@ -476,7 +479,7 @@ class PubrelPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -499,14 +502,14 @@ class PubrelReader extends Reader {
 
 class PubcompPropertiesReader extends Reader {
 	override public function read():PubcompProperties {
-		var p = {};
+		var p:PubcompProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case PubcompPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case PubcompPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -517,7 +520,7 @@ class PubcompPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -540,14 +543,14 @@ class PubcompReader extends Reader {
 
 class SubscribePropertiesReader extends Reader {
 	override public function read():SubscribeProperties {
-		var p = {};
+		var p:SubscribeProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case SubscribePropertyId.SubscriptionIdentifier:
-						Reflect.setField(p, "subscriptionIdentifier", readVariableByteInteger());
+						p.subscriptionIdentifier = readVariableByteInteger();
 					case SubscribePropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -558,7 +561,7 @@ class SubscribePropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -597,14 +600,14 @@ class SubscribeReader extends Reader {
 
 class SubackPropertiesReader extends Reader {
 	override public function read():SubackProperties {
-		var p = {};
+		var p:SubackProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case SubackPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case SubackPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -615,7 +618,7 @@ class SubackPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -646,7 +649,7 @@ class SubackReader extends Reader {
 
 class UnsubscribePropertiesReader extends Reader {
 	override public function read():UnsubscribeProperties {
-		var p = {};
+		var p:UnsubscribeProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
@@ -662,7 +665,7 @@ class UnsubscribePropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -690,14 +693,14 @@ class UnsubscribeReader extends Reader {
 
 class UnsubackPropertiesReader extends Reader {
 	override public function read():UnsubackProperties {
-		var p = {};
+		var p:UnsubackProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case UnsubackPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case UnsubackPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -708,7 +711,7 @@ class UnsubackPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -739,18 +742,18 @@ class UnsubackReader extends Reader {
 
 class AuthPropertiesReader extends Reader {
 	override public function read():AuthProperties {
-		var p = {};
+		var p:AuthProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case AuthPropertyId.AuthenticationMethod:
-						Reflect.setField(p, "authenticationMethod", readString());
+						p.authenticationMethod = readString();
 					case AuthPropertyId.AuthenticationData:
-						Reflect.setField(p, "authenticationData", readBinary());
+						p.authenticationData = readBinary();
 					case AuthPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case AuthPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -761,7 +764,7 @@ class AuthPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }
@@ -779,18 +782,18 @@ class AuthReader extends Reader {
 
 class DisconnectPropertiesReader extends Reader {
 	override public function read():DisconnectProperties {
-		var p = {};
+		var p:DisconnectProperties = {};
 		var u = {};
 		try {
 			while (!eof()) {
 				var propertyId = readVariableByteInteger();
 				switch (propertyId) {
 					case DisconnectPropertyId.SessionExpiryInterval:
-						Reflect.setField(p, "sessionExpiryInterval", readInt32());
+						p.sessionExpiryInterval = readInt32();
 					case DisconnectPropertyId.ServerReference:
-						Reflect.setField(p, "serverReference", readString());
+						p.serverReference = readString();
 					case DisconnectPropertyId.ReasonString:
-						Reflect.setField(p, "reasonString", readString());
+						p.reasonString = readString();
 					case DisconnectPropertyId.UserProperty:
 						Reflect.setField(u, readString(), readString());
 					default:
@@ -801,7 +804,7 @@ class DisconnectPropertiesReader extends Reader {
 			trace(e);
 		}
 		if (Reflect.fields(u).length > 0)
-			Reflect.setField(p, "userProperty", u);
+			p.userProperty = u;
 		return p;
 	}
 }

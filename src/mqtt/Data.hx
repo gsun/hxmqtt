@@ -83,7 +83,7 @@ typedef ConnackProperties = {
 	@:optional var reasonString:String;
 	@:optional var userProperty:Dynamic;
 	@:optional var wildcardSubscriptionAvailable:Bool;
-	@:optional var subscriptionIdentifiersAvailable:Bool;
+	@:optional var subscriptionIdentifierAvailable:Bool;
 	@:optional var sharedSubscriptionAvailable:Bool;
 	@:optional var serverKeepAlive:Int;
 	@:optional var responseInformation:String;
@@ -109,6 +109,7 @@ typedef Subscription = {
 typedef SubscribeProperties = {
 	@:optional var subscriptionIdentifier:Int;
 	@:optional var userProperty:Dynamic;
+	@:optional var reasonString:String;
 }
 
 typedef SubscribeBody = {

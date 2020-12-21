@@ -230,7 +230,7 @@ enum abstract ConnackPropertyId(Int) from Int to Int {
 	var MaximumPacketSize = 39;
 	var WildcardSubscriptionAvailable = 40;
 	var SubscriptionIdentifierAvailable = 41;
-	var SharedSubscriptionAvailabe = 42;
+	var SharedSubscriptionAvailable = 42;
 }
 
 enum abstract SubscribePropertyId(Int) from Int to Int {

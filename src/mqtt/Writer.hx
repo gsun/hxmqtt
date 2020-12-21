@@ -301,9 +301,9 @@ class ConnackPropertiesWriter extends Writer {
 					writeVariableByteInteger(ConnackPropertyId.SubscriptionIdentifierAvailable);
 					writeByte(properties.subscriptionIdentifierAvailable);
 				}
-				if (Reflect.hasField(properties, "sharedSubscriptionAvailabe")) {
-					writeVariableByteInteger(ConnackPropertyId.SharedSubscriptionAvailabe);
-					writeByte(properties.sharedSubscriptionAvailabe);
+				if (Reflect.hasField(properties, "sharedSubscriptionAvailable")) {
+					writeVariableByteInteger(ConnackPropertyId.SharedSubscriptionAvailable);
+					writeByte(properties.sharedSubscriptionAvailable);
 				}
 				if (Reflect.hasField(properties, "userProperty")) {
 					var userProperty = properties.userProperty;
