@@ -353,7 +353,7 @@ class ConnectTest extends utest.Test {
 			dup: false,
 			qos: QoS.AtMostOnce,
 			retain: false,
-			body: {}
+			body: null
 		}, p);
 	}
 }
@@ -530,7 +530,7 @@ class ConnackTest extends utest.Test {
 			dup: false,
 			qos: QoS.AtMostOnce,
 			retain: false,
-			body: {}
+			body: null
 		}, p);
 	}
 }
@@ -1348,7 +1348,7 @@ class PingreqTest extends utest.Test {
 			dup: false,
 			qos: QoS.AtMostOnce,
 			retain: false,
-			body: {}
+			body: null
 		}, p);
 
 		var o = new haxe.io.BytesOutput();
@@ -1375,7 +1375,7 @@ class PingrespTest extends utest.Test {
 			dup: false,
 			qos: QoS.AtMostOnce,
 			retain: false,
-			body: {}
+			body: null
 		}, p);
 
 		var o = new haxe.io.BytesOutput();

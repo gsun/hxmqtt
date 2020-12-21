@@ -77,7 +77,7 @@ class Reader {
 	function readBody(t:CtrlPktType) {
 		var cl = Type.resolveClass(ptCls[t]);
 		if (cl == null)
-			return {};
+			return null;
 
 		var remainingLength = readVariableByteInteger();
 		if (remainingLength == 0)
@@ -85,13 +85,11 @@ class Reader {
 
 		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(remainingLength));
 		var reader = Type.createInstance(cl, [bi]);
-		var bo = {};
 		try {
-			bo = reader.read();
+			return reader.read();
 		} catch (e) {
-			trace(e);
+			return null;
 		}
-		return bo;
 	}
 
 	function readProperties<T:Reader>(cl:Class<T>) {
@@ -101,13 +99,11 @@ class Reader {
 
 		var bi = new haxe.io.BufferInput(i, haxe.io.Bytes.alloc(length));
 		var reader = Type.createInstance(cl, [bi]);
-		var bo = {};
 		try {
-			bo = reader.read();
+			return reader.read();
 		} catch (e) {
-			trace(e);
+			return null;
 		}
-		return bo;
 	}
 
 	public function read():Dynamic {
