@@ -116,13 +116,15 @@ class Reader {
 		if (!AbstractEnumTools.getValues(QoS).contains(qos))
 			throw new MqttReaderException('invalid Qos ${qos}');
 		var body = readBody(pktType);
-		return {
+		var p:MqttPacket = {
 			pktType: pktType,
 			dup: dup,
 			qos: qos,
-			retain: retain,
-			body: body
+			retain: retain
 		};
+		if (body != null)
+			p.body = body;
+		return p;
 	}
 }
 

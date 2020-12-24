@@ -341,8 +341,7 @@ class ConnectTest extends utest.Test {
 			pktType: CtrlPktType.Connect,
 			dup: false,
 			qos: QoS.AtMostOnce,
-			retain: false,
-			body: null
+			retain: false
 		}, p);
 	}
 }
@@ -557,8 +556,7 @@ class ConnackTest extends utest.Test {
 			pktType: CtrlPktType.Connack,
 			dup: false,
 			qos: QoS.AtMostOnce,
-			retain: false,
-			body: null
+			retain: false
 		}, p);
 	}
 }
@@ -1375,8 +1373,7 @@ class PingreqTest extends utest.Test {
 			pktType: CtrlPktType.Pingreq,
 			dup: false,
 			qos: QoS.AtMostOnce,
-			retain: false,
-			body: null
+			retain: false
 		}, p);
 
 		var o = new haxe.io.BytesOutput();
@@ -1402,8 +1399,7 @@ class PingrespTest extends utest.Test {
 			pktType: CtrlPktType.Pingresp,
 			dup: false,
 			qos: QoS.AtMostOnce,
-			retain: false,
-			body: null
+			retain: false
 		}, p);
 
 		var o = new haxe.io.BytesOutput();
