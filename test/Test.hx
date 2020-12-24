@@ -50,19 +50,15 @@ class ConnectTest extends utest.Test {
 				protocolVersion: 5,
 				protocolName: "MQTT",
 				cleanStart: false,
-				keepalive: 30,
-				username: null,
-				password: null,
-				will: {
-					topic: null,
-					payload: null,
-					qos: 0,
-					retain: false,
-					properties: null
-				},
-				properties: null
+				keepalive: 30
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		trace(o.getBytes());
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 
 	/*connect MQTT 5*/
@@ -124,8 +120,6 @@ class ConnectTest extends utest.Test {
 				protocolName: "MQTT",
 				cleanStart: true,
 				keepalive: 30,
-				username: null,
-				password: null,
 				will: {
 					topic: "topic",
 					payload: Bytes.ofHex("04030201"),
@@ -218,8 +212,6 @@ class ConnectTest extends utest.Test {
 				protocolName: "MQTT",
 				cleanStart: true,
 				keepalive: 30,
-				username: null,
-				password: null,
 				will: {
 					topic: "topic",
 					payload: Bytes.ofString(""),
@@ -303,14 +295,11 @@ class ConnectTest extends utest.Test {
 				protocolName: "MQTT",
 				cleanStart: true,
 				keepalive: 30,
-				username: null,
-				password: null,
 				will: {
 					topic: "topic",
 					payload: Bytes.ofHex("04030201"),
 					qos: 2,
 					retain: true,
-					properties: null
 				},
 				properties: {
 					sessionExpiryInterval: 1234,
@@ -423,6 +412,40 @@ class ConnackTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var p2 = [
+			32, 87, 0, 0, 84, // properties length
+			17, 0, 0, 4, 210, // sessionExpiryInterval
+			18, 0, 4, 116, 101, 115, 116, // assignedClientIdentifier
+			19, 4,
+			210, // serverKeepAlive
+			21, 0, 4, 116, 101, 115, 116, // authenticationMethod
+			22, 0, 4, 1, 2, 3, 4, // authenticationData
+			26, 0, 4, 116, 101, 115,
+			116, // responseInformation
+			28, 0, 4, 116, 101, 115, 116, // serverReference
+			31, 0, 4, 116, 101, 115, 116, // reasonString
+			33, 1,
+			176, // receiveMaximum
+			34, 1, 200, // topicAliasMaximum
+			36, 2, // Maximum qos
+			37, 1, // retainAvailable
+			39, 0, 0, 0, 100, // maximumPacketSize
+			40,
+			1, // wildcardSubscriptionAvailable
+			41, 1, // subscriptionIdentifiersAvailable
+			42, 0, // sharedSubscriptionAvailable
+			38, 0, 4, 116, 101, 115, 116, 0,
+			4, 116, 101, 115, 116 // userProperties
+		];
+		var bb1 = new BytesBuffer();
+		for (i in p2)
+			bb1.addByte(i);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb1.getBytes(), o.getBytes());
 	}
 
 	public function testMultiUserProperties() {
@@ -493,7 +516,7 @@ class ConnackTest extends utest.Test {
 	}
 
 	public function testReturuCode0() {
-		var p1 = [32, 2, 1, 0, 0];
+		var p1 = [32, 3, 1, 0, 0];
 
 		var bb = new BytesBuffer();
 		for (i in p1)
@@ -513,6 +536,11 @@ class ConnackTest extends utest.Test {
 				properties: null
 			}
 		}, p);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb.getBytes(), o.getBytes());
 	}
 
 	public function testReturuCode5() {

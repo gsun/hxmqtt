@@ -225,24 +225,30 @@ class ConnectReader extends Reader {
 		var willPayload = (willFlag) ? readBinary() : null;
 		var userName = (userNameFlag) ? readString() : null;
 		var password = (passwordFlag) ? readBinary() : null;
-		var will = {
+		var will:Will = {
 			topic: willTopic,
 			payload: willPayload,
 			qos: willQos,
-			retain: willRetainFlag,
-			properties: willProperties
+			retain: willRetainFlag
 		};
-		return {
+		if (willProperties != null)
+			will.properties = willProperties;
+		var p:ConnectBody = {
 			clientId: clientId,
 			protocolVersion: protocolVersion,
 			protocolName: protocolName,
 			cleanStart: cleanStart,
-			keepalive: keepAlive,
-			username: userName,
-			password: password,
-			will: will,
-			properties: connectPorperties
+			keepalive: keepAlive
 		};
+		if (willFlag)
+			p.will = will;
+		if (userNameFlag)
+			p.username = userName;
+		if (passwordFlag)
+			p.password = password;
+		if (connectPorperties != null)
+			p.properties = connectPorperties;
+		return p;
 	}
 }
 
