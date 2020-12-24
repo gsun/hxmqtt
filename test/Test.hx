@@ -57,7 +57,6 @@ class ConnectTest extends utest.Test {
 		var o = new haxe.io.BytesOutput();
 		var w = new Writer(o);
 		w.write(p);
-		trace(o.getBytes());
 		Assert.same(bb.getBytes(), o.getBytes());
 	}
 

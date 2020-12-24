@@ -196,6 +196,8 @@ class WillPropertiesWriter extends Writer {
 
 class ConnectWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:ConnectBody = cast p.body;
 		var userNameFlag = b.username != null ? true : false;
@@ -312,6 +314,8 @@ class ConnackPropertiesWriter extends Writer {
 
 class ConnackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:ConnackBody = cast p.body;
 		bits.writeBits(7, 0);
@@ -373,6 +377,8 @@ class PublishPropertiesWriter extends Writer {
 
 class PublishWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:PublishBody = cast p.body;
 		writeString(b.topic);
@@ -408,6 +414,8 @@ class PubackPropertiesWriter extends Writer {
 
 class PubackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:PubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -442,6 +450,8 @@ class PubrecPropertiesWriter extends Writer {
 
 class PubrecWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:PubrecBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -476,6 +486,8 @@ class PubrelPropertiesWriter extends Writer {
 
 class PubrelWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:PubrelBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -510,6 +522,8 @@ class PubcompPropertiesWriter extends Writer {
 
 class PubcompWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:PubcompBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -544,6 +558,8 @@ class SubscribePropertiesWriter extends Writer {
 
 class SubscribeWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:SubscribeBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -585,6 +601,8 @@ class SubackPropertiesWriter extends Writer {
 
 class SubackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:SubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -617,6 +635,8 @@ class UnsubscribePropertiesWriter extends Writer {
 
 class UnsubscribeWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:UnsubscribeBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -653,6 +673,8 @@ class UnsubackPropertiesWriter extends Writer {
 
 class UnsubackWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:UnsubackBody = cast p.body;
 		writeUInt16(b.packetIdentifier);
@@ -697,6 +719,8 @@ class AuthPropertiesWriter extends Writer {
 
 class AuthWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:AuthBody = cast p.body;
 		writeByte(b.reasonCode);
@@ -738,6 +762,8 @@ class DisconnectPropertiesWriter extends Writer {
 
 class DisconnectWriter extends Writer {
 	override public function write(p:MqttPacket) {
+		if (p.body == null)
+			return;
 		this.p = p;
 		var b:DisconnectBody = cast p.body;
 		writeByte(b.reasonCode);
