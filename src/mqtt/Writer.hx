@@ -100,96 +100,88 @@ class Writer {
 
 class ConnectPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.sessionExpiryInterval != null) {
-					writeVariableByteInteger(ConnectPropertyId.SessionExpiryInterval);
-					writeInt32(properties.sessionExpiryInterval);
-				}
-				if (properties.authenticationMethod != null) {
-					writeVariableByteInteger(ConnectPropertyId.AuthenticationMethod);
-					writeString(properties.authenticationMethod);
-				}
-				if (properties.authenticationData != null) {
-					writeVariableByteInteger(ConnectPropertyId.AuthenticationData);
-					writeBinary(properties.authenticationData);
-				}
-				if (properties.requestProblemInformation != null) {
-					writeVariableByteInteger(ConnectPropertyId.RequestProblemInformation);
-					writeByte(properties.requestProblemInformation);
-				}
-				if (properties.requestResponseInformation != null) {
-					writeVariableByteInteger(ConnectPropertyId.RequestResponseInformation);
-					writeByte(properties.requestResponseInformation);
-				}
-				if (properties.receiveMaximum != null) {
-					writeVariableByteInteger(ConnectPropertyId.ReceiveMaximum);
-					writeUInt16(properties.receiveMaximum);
-				}
-				if (properties.topicAliasMaximum != null) {
-					writeVariableByteInteger(ConnectPropertyId.TopicAliasMaximum);
-					writeUInt16(properties.topicAliasMaximum);
-				}
-				if (properties.maximumPacketSize != null) {
-					writeVariableByteInteger(ConnectPropertyId.MaximumPacketSize);
-					writeInt32(properties.maximumPacketSize);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(ConnectPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.sessionExpiryInterval != null) {
+			writeVariableByteInteger(ConnectPropertyId.SessionExpiryInterval);
+			writeInt32(properties.sessionExpiryInterval);
+		}
+		if (properties.authenticationMethod != null) {
+			writeVariableByteInteger(ConnectPropertyId.AuthenticationMethod);
+			writeString(properties.authenticationMethod);
+		}
+		if (properties.authenticationData != null) {
+			writeVariableByteInteger(ConnectPropertyId.AuthenticationData);
+			writeBinary(properties.authenticationData);
+		}
+		if (properties.requestProblemInformation != null) {
+			writeVariableByteInteger(ConnectPropertyId.RequestProblemInformation);
+			writeByte(properties.requestProblemInformation);
+		}
+		if (properties.requestResponseInformation != null) {
+			writeVariableByteInteger(ConnectPropertyId.RequestResponseInformation);
+			writeByte(properties.requestResponseInformation);
+		}
+		if (properties.receiveMaximum != null) {
+			writeVariableByteInteger(ConnectPropertyId.ReceiveMaximum);
+			writeUInt16(properties.receiveMaximum);
+		}
+		if (properties.topicAliasMaximum != null) {
+			writeVariableByteInteger(ConnectPropertyId.TopicAliasMaximum);
+			writeUInt16(properties.topicAliasMaximum);
+		}
+		if (properties.maximumPacketSize != null) {
+			writeVariableByteInteger(ConnectPropertyId.MaximumPacketSize);
+			writeInt32(properties.maximumPacketSize);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(ConnectPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
 
 class WillPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.will.properties != null) {
-				var properties = p.body.will.properties;
-				if (properties.payloadFormatIndicator != null) {
-					writeVariableByteInteger(WillPropertyId.PayloadFormatIndicator);
-					writeByte(properties.payloadFormatIndicator);
-				}
-				if (properties.messageExpiryInterval != null) {
-					writeVariableByteInteger(WillPropertyId.MessageExpiryInterval);
-					writeInt32(properties.messageExpiryInterval);
-				}
-				if (properties.contentType != null) {
-					writeVariableByteInteger(WillPropertyId.ContentType);
-					writeString(properties.contentType);
-				}
-				if (properties.responseTopic != null) {
-					writeVariableByteInteger(WillPropertyId.ResponseTopic);
-					writeString(properties.responseTopic);
-				}
-				if (properties.correlationData != null) {
-					writeVariableByteInteger(WillPropertyId.CorrelationData);
-					writeBinary(properties.correlationData);
-				}
-				if (properties.willDelayInterval != null) {
-					writeVariableByteInteger(WillPropertyId.WillDelayInterval);
-					writeInt32(properties.willDelayInterval);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(WillPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.will.properties == null)
+			return;
+		var properties = p.body.will.properties;
+		if (properties.payloadFormatIndicator != null) {
+			writeVariableByteInteger(WillPropertyId.PayloadFormatIndicator);
+			writeByte(properties.payloadFormatIndicator);
+		}
+		if (properties.messageExpiryInterval != null) {
+			writeVariableByteInteger(WillPropertyId.MessageExpiryInterval);
+			writeInt32(properties.messageExpiryInterval);
+		}
+		if (properties.contentType != null) {
+			writeVariableByteInteger(WillPropertyId.ContentType);
+			writeString(properties.contentType);
+		}
+		if (properties.responseTopic != null) {
+			writeVariableByteInteger(WillPropertyId.ResponseTopic);
+			writeString(properties.responseTopic);
+		}
+		if (properties.correlationData != null) {
+			writeVariableByteInteger(WillPropertyId.CorrelationData);
+			writeBinary(properties.correlationData);
+		}
+		if (properties.willDelayInterval != null) {
+			writeVariableByteInteger(WillPropertyId.WillDelayInterval);
+			writeInt32(properties.willDelayInterval);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(WillPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -230,84 +222,80 @@ class ConnectWriter extends Writer {
 
 class ConnackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.sessionExpiryInterval != null) {
-					writeVariableByteInteger(ConnackPropertyId.SessionExpiryInterval);
-					writeInt32(properties.sessionExpiryInterval);
-				}
-				if (properties.assignedClientIdentifier != null) {
-					writeVariableByteInteger(ConnackPropertyId.AssignedClientIdentifier);
-					writeString(properties.assignedClientIdentifier);
-				}
-				if (properties.serverKeepAlive != null) {
-					writeVariableByteInteger(ConnackPropertyId.ServerKeepAlive);
-					writeUInt16(properties.serverKeepAlive);
-				}
-				if (properties.authenticationMethod != null) {
-					writeVariableByteInteger(ConnackPropertyId.AuthenticationMethod);
-					writeString(properties.authenticationMethod);
-				}
-				if (properties.authenticationData != null) {
-					writeVariableByteInteger(ConnackPropertyId.AuthenticationData);
-					writeBinary(properties.authenticationData);
-				}
-				if (properties.responseInformation != null) {
-					writeVariableByteInteger(ConnackPropertyId.ResponseInformation);
-					writeString(properties.responseInformation);
-				}
-				if (properties.serverReference != null) {
-					writeVariableByteInteger(ConnackPropertyId.ServerReference);
-					writeString(properties.serverReference);
-				}
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(ConnackPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.receiveMaximum != null) {
-					writeVariableByteInteger(ConnackPropertyId.ReceiveMaximum);
-					writeUInt16(properties.receiveMaximum);
-				}
-				if (properties.topicAliasMaximum != null) {
-					writeVariableByteInteger(ConnackPropertyId.TopicAliasMaximum);
-					writeUInt16(properties.topicAliasMaximum);
-				}
-				if (properties.maximumQoS != null) {
-					writeVariableByteInteger(ConnackPropertyId.MaximumQoS);
-					writeByte(properties.maximumQoS);
-				}
-				if (properties.retainAvailable != null) {
-					writeVariableByteInteger(ConnackPropertyId.RetainAvailable);
-					writeByte(properties.retainAvailable);
-				}
-				if (properties.maximumPacketSize != null) {
-					writeVariableByteInteger(ConnackPropertyId.MaximumPacketSize);
-					writeInt32(properties.maximumPacketSize);
-				}
-				if (properties.wildcardSubscriptionAvailable != null) {
-					writeVariableByteInteger(ConnackPropertyId.WildcardSubscriptionAvailable);
-					writeByte(properties.wildcardSubscriptionAvailable);
-				}
-				if (properties.subscriptionIdentifierAvailable != null) {
-					writeVariableByteInteger(ConnackPropertyId.SubscriptionIdentifierAvailable);
-					writeByte(properties.subscriptionIdentifierAvailable);
-				}
-				if (properties.sharedSubscriptionAvailable != null) {
-					writeVariableByteInteger(ConnackPropertyId.SharedSubscriptionAvailable);
-					writeByte(properties.sharedSubscriptionAvailable);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(ConnackPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.sessionExpiryInterval != null) {
+			writeVariableByteInteger(ConnackPropertyId.SessionExpiryInterval);
+			writeInt32(properties.sessionExpiryInterval);
+		}
+		if (properties.assignedClientIdentifier != null) {
+			writeVariableByteInteger(ConnackPropertyId.AssignedClientIdentifier);
+			writeString(properties.assignedClientIdentifier);
+		}
+		if (properties.serverKeepAlive != null) {
+			writeVariableByteInteger(ConnackPropertyId.ServerKeepAlive);
+			writeUInt16(properties.serverKeepAlive);
+		}
+		if (properties.authenticationMethod != null) {
+			writeVariableByteInteger(ConnackPropertyId.AuthenticationMethod);
+			writeString(properties.authenticationMethod);
+		}
+		if (properties.authenticationData != null) {
+			writeVariableByteInteger(ConnackPropertyId.AuthenticationData);
+			writeBinary(properties.authenticationData);
+		}
+		if (properties.responseInformation != null) {
+			writeVariableByteInteger(ConnackPropertyId.ResponseInformation);
+			writeString(properties.responseInformation);
+		}
+		if (properties.serverReference != null) {
+			writeVariableByteInteger(ConnackPropertyId.ServerReference);
+			writeString(properties.serverReference);
+		}
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(ConnackPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.receiveMaximum != null) {
+			writeVariableByteInteger(ConnackPropertyId.ReceiveMaximum);
+			writeUInt16(properties.receiveMaximum);
+		}
+		if (properties.topicAliasMaximum != null) {
+			writeVariableByteInteger(ConnackPropertyId.TopicAliasMaximum);
+			writeUInt16(properties.topicAliasMaximum);
+		}
+		if (properties.maximumQoS != null) {
+			writeVariableByteInteger(ConnackPropertyId.MaximumQoS);
+			writeByte(properties.maximumQoS);
+		}
+		if (properties.retainAvailable != null) {
+			writeVariableByteInteger(ConnackPropertyId.RetainAvailable);
+			writeByte(properties.retainAvailable);
+		}
+		if (properties.maximumPacketSize != null) {
+			writeVariableByteInteger(ConnackPropertyId.MaximumPacketSize);
+			writeInt32(properties.maximumPacketSize);
+		}
+		if (properties.wildcardSubscriptionAvailable != null) {
+			writeVariableByteInteger(ConnackPropertyId.WildcardSubscriptionAvailable);
+			writeByte(properties.wildcardSubscriptionAvailable);
+		}
+		if (properties.subscriptionIdentifierAvailable != null) {
+			writeVariableByteInteger(ConnackPropertyId.SubscriptionIdentifierAvailable);
+			writeByte(properties.subscriptionIdentifierAvailable);
+		}
+		if (properties.sharedSubscriptionAvailable != null) {
+			writeVariableByteInteger(ConnackPropertyId.SharedSubscriptionAvailable);
+			writeByte(properties.sharedSubscriptionAvailable);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(ConnackPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -327,50 +315,46 @@ class ConnackWriter extends Writer {
 
 class PublishPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties:PublishProperties = cast p.body.properties;
-				if (properties.payloadFormatIndicator != null) {
-					writeVariableByteInteger(PublishPropertyId.PayloadFormatIndicator);
-					writeByte(properties.payloadFormatIndicator);
-				}
-				if (properties.messageExpiryInterval != null) {
-					writeVariableByteInteger(PublishPropertyId.MessageExpiryInterval);
-					writeInt32(properties.messageExpiryInterval);
-				}
-				if (properties.contentType != null) {
-					writeVariableByteInteger(PublishPropertyId.ContentType);
-					writeString(properties.contentType);
-				}
-				if (properties.responseTopic != null) {
-					writeVariableByteInteger(PublishPropertyId.ResponseTopic);
-					writeString(properties.responseTopic);
-				}
-				if (properties.correlationData != null) {
-					writeVariableByteInteger(PublishPropertyId.CorrelationData);
-					writeBinary(properties.correlationData);
-				}
-				if (properties.topicAlias != null) {
-					writeVariableByteInteger(PublishPropertyId.TopicAlias);
-					writeUInt16(properties.topicAlias);
-				}
-				if (properties.subscriptionIdentifier != null) {
-					for (i in properties.subscriptionIdentifier) {
-						writeVariableByteInteger(PublishPropertyId.SubscriptionIdentifier);
-						writeVariableByteInteger(i);
-					}
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(PublishPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties:PublishProperties = cast p.body.properties;
+		if (properties.payloadFormatIndicator != null) {
+			writeVariableByteInteger(PublishPropertyId.PayloadFormatIndicator);
+			writeByte(properties.payloadFormatIndicator);
+		}
+		if (properties.messageExpiryInterval != null) {
+			writeVariableByteInteger(PublishPropertyId.MessageExpiryInterval);
+			writeInt32(properties.messageExpiryInterval);
+		}
+		if (properties.contentType != null) {
+			writeVariableByteInteger(PublishPropertyId.ContentType);
+			writeString(properties.contentType);
+		}
+		if (properties.responseTopic != null) {
+			writeVariableByteInteger(PublishPropertyId.ResponseTopic);
+			writeString(properties.responseTopic);
+		}
+		if (properties.correlationData != null) {
+			writeVariableByteInteger(PublishPropertyId.CorrelationData);
+			writeBinary(properties.correlationData);
+		}
+		if (properties.topicAlias != null) {
+			writeVariableByteInteger(PublishPropertyId.TopicAlias);
+			writeUInt16(properties.topicAlias);
+		}
+		if (properties.subscriptionIdentifier != null) {
+			for (i in properties.subscriptionIdentifier) {
+				writeVariableByteInteger(PublishPropertyId.SubscriptionIdentifier);
+				writeVariableByteInteger(i);
 			}
-		} catch (e) {
-			trace(e);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(PublishPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
+			}
 		}
 	}
 }
@@ -390,24 +374,20 @@ class PublishWriter extends Writer {
 
 class PubackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(PubackPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(PubackPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(PubackPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(PubackPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -426,24 +406,20 @@ class PubackWriter extends Writer {
 
 class PubrecPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(PubrecPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(PubrecPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(PubrecPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(PubrecPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -462,24 +438,20 @@ class PubrecWriter extends Writer {
 
 class PubrelPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(PubrelPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(PubrelPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(PubrelPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(PubrelPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -498,24 +470,20 @@ class PubrelWriter extends Writer {
 
 class PubcompPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(PubcompPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(PubcompPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(PubcompPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(PubcompPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -534,24 +502,20 @@ class PubcompWriter extends Writer {
 
 class SubscribePropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.subscriptionIdentifier != null) {
-					writeVariableByteInteger(SubscribePropertyId.SubscriptionIdentifier);
-					writeVariableByteInteger(properties.subscriptionIdentifier);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(SubscribePropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.subscriptionIdentifier != null) {
+			writeVariableByteInteger(SubscribePropertyId.SubscriptionIdentifier);
+			writeVariableByteInteger(properties.subscriptionIdentifier);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(SubscribePropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -577,24 +541,20 @@ class SubscribeWriter extends Writer {
 
 class SubackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(SubackPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					writeVariableByteInteger(SubackPropertyId.UserProperty);
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(SubackPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			writeVariableByteInteger(SubackPropertyId.UserProperty);
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -615,20 +575,16 @@ class SubackWriter extends Writer {
 
 class UnsubscribePropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(UnsubscribePropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(UnsubscribePropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -649,24 +605,20 @@ class UnsubscribeWriter extends Writer {
 
 class UnsubackPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(UnsubackPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(UnsubackPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(UnsubackPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(UnsubackPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -687,32 +639,28 @@ class UnsubackWriter extends Writer {
 
 class AuthPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties = p.body.properties;
-				if (properties.authenticationMethod != null) {
-					writeVariableByteInteger(AuthPropertyId.AuthenticationMethod);
-					writeString(properties.authenticationMethod);
-				}
-				if (properties.authenticationData != null) {
-					writeVariableByteInteger(AuthPropertyId.AuthenticationData);
-					writeBinary(properties.authenticationData);
-				}
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(AuthPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(AuthPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties = p.body.properties;
+		if (properties.authenticationMethod != null) {
+			writeVariableByteInteger(AuthPropertyId.AuthenticationMethod);
+			writeString(properties.authenticationMethod);
+		}
+		if (properties.authenticationData != null) {
+			writeVariableByteInteger(AuthPropertyId.AuthenticationData);
+			writeBinary(properties.authenticationData);
+		}
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(AuthPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(AuthPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
@@ -730,32 +678,28 @@ class AuthWriter extends Writer {
 
 class DisconnectPropertiesWriter extends Writer {
 	override function write(p:MqttPacket) {
-		try {
-			if (p.body.properties != null) {
-				var properties:DisconnectProperties = cast p.body.properties;
-				if (properties.sessionExpiryInterval != null) {
-					writeVariableByteInteger(DisconnectPropertyId.SessionExpiryInterval);
-					writeInt32(properties.sessionExpiryInterval);
-				}
-				if (properties.serverReference != null) {
-					writeVariableByteInteger(DisconnectPropertyId.ServerReference);
-					writeString(properties.serverReference);
-				}
-				if (properties.reasonString != null) {
-					writeVariableByteInteger(DisconnectPropertyId.ReasonString);
-					writeString(properties.reasonString);
-				}
-				if (properties.userProperty != null) {
-					var userProperty = properties.userProperty;
-					for (f in Reflect.fields(userProperty)) {
-						writeVariableByteInteger(DisconnectPropertyId.UserProperty);
-						writeString(f);
-						writeString(Reflect.field(userProperty, f));
-					}
-				}
+		if (p.body.properties == null)
+			return;
+		var properties:DisconnectProperties = cast p.body.properties;
+		if (properties.sessionExpiryInterval != null) {
+			writeVariableByteInteger(DisconnectPropertyId.SessionExpiryInterval);
+			writeInt32(properties.sessionExpiryInterval);
+		}
+		if (properties.serverReference != null) {
+			writeVariableByteInteger(DisconnectPropertyId.ServerReference);
+			writeString(properties.serverReference);
+		}
+		if (properties.reasonString != null) {
+			writeVariableByteInteger(DisconnectPropertyId.ReasonString);
+			writeString(properties.reasonString);
+		}
+		if (properties.userProperty != null) {
+			var userProperty = properties.userProperty;
+			for (f in Reflect.fields(userProperty)) {
+				writeVariableByteInteger(DisconnectPropertyId.UserProperty);
+				writeString(f);
+				writeString(Reflect.field(userProperty, f));
 			}
-		} catch (e) {
-			trace(e);
 		}
 	}
 }
