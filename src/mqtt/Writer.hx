@@ -103,39 +103,39 @@ class ConnectPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
+				if (properties.sessionExpiryInterval != null) {
 					writeVariableByteInteger(ConnectPropertyId.SessionExpiryInterval);
 					writeInt32(properties.sessionExpiryInterval);
 				}
-				if (Reflect.hasField(properties, "authenticationMethod")) {
+				if (properties.authenticationMethod != null) {
 					writeVariableByteInteger(ConnectPropertyId.AuthenticationMethod);
 					writeString(properties.authenticationMethod);
 				}
-				if (Reflect.hasField(properties, "authenticationData")) {
+				if (properties.authenticationData != null) {
 					writeVariableByteInteger(ConnectPropertyId.AuthenticationData);
 					writeBinary(properties.authenticationData);
 				}
-				if (Reflect.hasField(properties, "requestProblemInformation")) {
+				if (properties.requestProblemInformation != null) {
 					writeVariableByteInteger(ConnectPropertyId.RequestProblemInformation);
 					writeByte(properties.requestProblemInformation);
 				}
-				if (Reflect.hasField(properties, "requestResponseInformation")) {
+				if (properties.requestResponseInformation != null) {
 					writeVariableByteInteger(ConnectPropertyId.RequestResponseInformation);
 					writeByte(properties.requestResponseInformation);
 				}
-				if (Reflect.hasField(properties, "receiveMaximum")) {
+				if (properties.receiveMaximum != null) {
 					writeVariableByteInteger(ConnectPropertyId.ReceiveMaximum);
 					writeUInt16(properties.receiveMaximum);
 				}
-				if (Reflect.hasField(properties, "topicAliasMaximum")) {
+				if (properties.topicAliasMaximum != null) {
 					writeVariableByteInteger(ConnectPropertyId.TopicAliasMaximum);
 					writeUInt16(properties.topicAliasMaximum);
 				}
-				if (Reflect.hasField(properties, "maximumPacketSize")) {
+				if (properties.maximumPacketSize != null) {
 					writeVariableByteInteger(ConnectPropertyId.MaximumPacketSize);
 					writeInt32(properties.maximumPacketSize);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(ConnectPropertyId.UserProperty);
@@ -155,31 +155,31 @@ class WillPropertiesWriter extends Writer {
 		try {
 			if (p.body.will.properties != null) {
 				var properties = p.body.will.properties;
-				if (Reflect.hasField(properties, "payloadFormatIndicator")) {
+				if (properties.payloadFormatIndicator != null) {
 					writeVariableByteInteger(WillPropertyId.PayloadFormatIndicator);
 					writeByte(properties.payloadFormatIndicator);
 				}
-				if (Reflect.hasField(properties, "messageExpiryInterval")) {
+				if (properties.messageExpiryInterval != null) {
 					writeVariableByteInteger(WillPropertyId.MessageExpiryInterval);
 					writeInt32(properties.messageExpiryInterval);
 				}
-				if (Reflect.hasField(properties, "contentType")) {
+				if (properties.contentType != null) {
 					writeVariableByteInteger(WillPropertyId.ContentType);
 					writeString(properties.contentType);
 				}
-				if (Reflect.hasField(properties, "responseTopic")) {
+				if (properties.responseTopic != null) {
 					writeVariableByteInteger(WillPropertyId.ResponseTopic);
 					writeString(properties.responseTopic);
 				}
-				if (Reflect.hasField(properties, "correlationData")) {
+				if (properties.correlationData != null) {
 					writeVariableByteInteger(WillPropertyId.CorrelationData);
 					writeBinary(properties.correlationData);
 				}
-				if (Reflect.hasField(properties, "willDelayInterval")) {
+				if (properties.willDelayInterval != null) {
 					writeVariableByteInteger(WillPropertyId.WillDelayInterval);
 					writeInt32(properties.willDelayInterval);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(WillPropertyId.UserProperty);
@@ -198,9 +198,9 @@ class ConnectWriter extends Writer {
 	override public function write(p:MqttPacket) {
 		this.p = p;
 		var b:ConnectBody = cast p.body;
-		var userNameFlag = Reflect.hasField(b, "username");
-		var passwordFlag = Reflect.hasField(b, "password");
-		var willFlag = Reflect.hasField(b, "will");
+		var userNameFlag = b.username != null ? true : false;
+		var passwordFlag = b.password != null ? true : false;
+		var willFlag = b.will != null ? true : false;
 		writeString(b.protocolName);
 		writeByte(b.protocolVersion);
 		bits.writeBit(userNameFlag);
@@ -231,71 +231,71 @@ class ConnackPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
+				if (properties.sessionExpiryInterval != null) {
 					writeVariableByteInteger(ConnackPropertyId.SessionExpiryInterval);
 					writeInt32(properties.sessionExpiryInterval);
 				}
-				if (Reflect.hasField(properties, "assignedClientIdentifier")) {
+				if (properties.assignedClientIdentifier != null) {
 					writeVariableByteInteger(ConnackPropertyId.AssignedClientIdentifier);
 					writeString(properties.assignedClientIdentifier);
 				}
-				if (Reflect.hasField(properties, "serverKeepAlive")) {
+				if (properties.serverKeepAlive != null) {
 					writeVariableByteInteger(ConnackPropertyId.ServerKeepAlive);
 					writeUInt16(properties.serverKeepAlive);
 				}
-				if (Reflect.hasField(properties, "authenticationMethod")) {
+				if (properties.authenticationMethod != null) {
 					writeVariableByteInteger(ConnackPropertyId.AuthenticationMethod);
 					writeString(properties.authenticationMethod);
 				}
-				if (Reflect.hasField(properties, "authenticationData")) {
+				if (properties.authenticationData != null) {
 					writeVariableByteInteger(ConnackPropertyId.AuthenticationData);
 					writeBinary(properties.authenticationData);
 				}
-				if (Reflect.hasField(properties, "responseInformation")) {
+				if (properties.responseInformation != null) {
 					writeVariableByteInteger(ConnackPropertyId.ResponseInformation);
 					writeString(properties.responseInformation);
 				}
-				if (Reflect.hasField(properties, "serverReference")) {
+				if (properties.serverReference != null) {
 					writeVariableByteInteger(ConnackPropertyId.ServerReference);
 					writeString(properties.serverReference);
 				}
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(ConnackPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "receiveMaximum")) {
+				if (properties.receiveMaximum != null) {
 					writeVariableByteInteger(ConnackPropertyId.ReceiveMaximum);
 					writeUInt16(properties.receiveMaximum);
 				}
-				if (Reflect.hasField(properties, "topicAliasMaximum")) {
+				if (properties.topicAliasMaximum != null) {
 					writeVariableByteInteger(ConnackPropertyId.TopicAliasMaximum);
 					writeUInt16(properties.topicAliasMaximum);
 				}
-				if (Reflect.hasField(properties, "maximumQoS")) {
+				if (properties.maximumQoS != null) {
 					writeVariableByteInteger(ConnackPropertyId.MaximumQoS);
 					writeByte(properties.maximumQoS);
 				}
-				if (Reflect.hasField(properties, "retainAvailable")) {
+				if (properties.retainAvailable != null) {
 					writeVariableByteInteger(ConnackPropertyId.RetainAvailable);
 					writeByte(properties.retainAvailable);
 				}
-				if (Reflect.hasField(properties, "maximumPacketSize")) {
+				if (properties.maximumPacketSize != null) {
 					writeVariableByteInteger(ConnackPropertyId.MaximumPacketSize);
 					writeInt32(properties.maximumPacketSize);
 				}
-				if (Reflect.hasField(properties, "wildcardSubscriptionAvailable")) {
+				if (properties.wildcardSubscriptionAvailable != null) {
 					writeVariableByteInteger(ConnackPropertyId.WildcardSubscriptionAvailable);
 					writeByte(properties.wildcardSubscriptionAvailable);
 				}
-				if (Reflect.hasField(properties, "subscriptionIdentifierAvailable")) {
+				if (properties.subscriptionIdentifierAvailable != null) {
 					writeVariableByteInteger(ConnackPropertyId.SubscriptionIdentifierAvailable);
 					writeByte(properties.subscriptionIdentifierAvailable);
 				}
-				if (Reflect.hasField(properties, "sharedSubscriptionAvailable")) {
+				if (properties.sharedSubscriptionAvailable != null) {
 					writeVariableByteInteger(ConnackPropertyId.SharedSubscriptionAvailable);
 					writeByte(properties.sharedSubscriptionAvailable);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(ConnackPropertyId.UserProperty);
@@ -326,37 +326,37 @@ class PublishPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties:PublishProperties = cast p.body.properties;
-				if (Reflect.hasField(properties, "payloadFormatIndicator")) {
+				if (properties.payloadFormatIndicator != null) {
 					writeVariableByteInteger(PublishPropertyId.PayloadFormatIndicator);
 					writeByte(properties.payloadFormatIndicator);
 				}
-				if (Reflect.hasField(properties, "messageExpiryInterval")) {
+				if (properties.messageExpiryInterval != null) {
 					writeVariableByteInteger(PublishPropertyId.MessageExpiryInterval);
 					writeInt32(properties.messageExpiryInterval);
 				}
-				if (Reflect.hasField(properties, "contentType")) {
+				if (properties.contentType != null) {
 					writeVariableByteInteger(PublishPropertyId.ContentType);
 					writeString(properties.contentType);
 				}
-				if (Reflect.hasField(properties, "responseTopic")) {
+				if (properties.responseTopic != null) {
 					writeVariableByteInteger(PublishPropertyId.ResponseTopic);
 					writeString(properties.responseTopic);
 				}
-				if (Reflect.hasField(properties, "correlationData")) {
+				if (properties.correlationData != null) {
 					writeVariableByteInteger(PublishPropertyId.CorrelationData);
 					writeBinary(properties.correlationData);
 				}
-				if (Reflect.hasField(properties, "topicAlias")) {
+				if (properties.topicAlias != null) {
 					writeVariableByteInteger(PublishPropertyId.TopicAlias);
 					writeUInt16(properties.topicAlias);
 				}
-				if (Reflect.hasField(properties, "subscriptionIdentifier")) {
+				if (properties.subscriptionIdentifier != null) {
 					for (i in properties.subscriptionIdentifier) {
 						writeVariableByteInteger(PublishPropertyId.SubscriptionIdentifier);
 						writeVariableByteInteger(i);
 					}
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(PublishPropertyId.UserProperty);
@@ -387,11 +387,11 @@ class PubackPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(PubackPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(PubackPropertyId.UserProperty);
@@ -421,11 +421,11 @@ class PubrecPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(PubrecPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(PubrecPropertyId.UserProperty);
@@ -455,11 +455,11 @@ class PubrelPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(PubrelPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(PubrelPropertyId.UserProperty);
@@ -489,11 +489,11 @@ class PubcompPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(PubcompPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(PubcompPropertyId.UserProperty);
@@ -523,11 +523,11 @@ class SubscribePropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "subscriptionIdentifier")) {
+				if (properties.subscriptionIdentifier != null) {
 					writeVariableByteInteger(SubscribePropertyId.SubscriptionIdentifier);
 					writeVariableByteInteger(properties.subscriptionIdentifier);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(SubscribePropertyId.UserProperty);
@@ -564,11 +564,11 @@ class SubackPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(SubackPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					writeVariableByteInteger(SubackPropertyId.UserProperty);
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
@@ -600,7 +600,7 @@ class UnsubscribePropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(UnsubscribePropertyId.UserProperty);
@@ -632,11 +632,11 @@ class UnsubackPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(UnsubackPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(UnsubackPropertyId.UserProperty);
@@ -668,19 +668,19 @@ class AuthPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties = p.body.properties;
-				if (Reflect.hasField(properties, "authenticationMethod")) {
+				if (properties.authenticationMethod != null) {
 					writeVariableByteInteger(AuthPropertyId.AuthenticationMethod);
 					writeString(properties.authenticationMethod);
 				}
-				if (Reflect.hasField(properties, "authenticationData")) {
+				if (properties.authenticationData != null) {
 					writeVariableByteInteger(AuthPropertyId.AuthenticationData);
 					writeBinary(properties.authenticationData);
 				}
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(AuthPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(AuthPropertyId.UserProperty);
@@ -709,19 +709,19 @@ class DisconnectPropertiesWriter extends Writer {
 		try {
 			if (p.body.properties != null) {
 				var properties:DisconnectProperties = cast p.body.properties;
-				if (Reflect.hasField(properties, "sessionExpiryInterval")) {
+				if (properties.sessionExpiryInterval != null) {
 					writeVariableByteInteger(DisconnectPropertyId.SessionExpiryInterval);
 					writeInt32(properties.sessionExpiryInterval);
 				}
-				if (Reflect.hasField(properties, "serverReference")) {
+				if (properties.serverReference != null) {
 					writeVariableByteInteger(DisconnectPropertyId.ServerReference);
 					writeString(properties.serverReference);
 				}
-				if (Reflect.hasField(properties, "reasonString")) {
+				if (properties.reasonString != null) {
 					writeVariableByteInteger(DisconnectPropertyId.ReasonString);
 					writeString(properties.reasonString);
 				}
-				if (Reflect.hasField(properties, "userProperty")) {
+				if (properties.userProperty != null) {
 					var userProperty = properties.userProperty;
 					for (f in Reflect.fields(userProperty)) {
 						writeVariableByteInteger(DisconnectPropertyId.UserProperty);
