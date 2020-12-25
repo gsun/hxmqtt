@@ -151,6 +151,54 @@ class ConnectTest extends utest.Test {
 				}
 			}
 		}, p);
+
+		var p2 = [
+			16, 125, // Header
+			0, 4, // Protocol ID length
+			77, 81, 84, 84, // Protocol ID
+			5, // Protocol version
+			54, // Connect flags
+			0, 30, // Keepalive
+			47, // properties length
+			17, 0, 0, 4, 210, // sessionExpiryInterval
+			21, 0, 4, 116, 101, 115, 116, // authenticationMethod
+			22, 0, 4, 1, 2, 3,
+			4, // authenticationData
+			23, 1, // requestProblemInformation,
+			25, 1, // requestResponseInformation
+			33, 1, 176, // receiveMaximum
+			34, 1,
+			200, // topicAliasMaximum
+			39, 0, 0, 0, 100, // maximumPacketSize
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties,
+			0,
+			4, // Client ID length
+			116, 101, 115, 116, // Client ID
+			47, // will properties
+			1, 0, // payload format indicator
+			2, 0, 0, 16,
+			225, // message expiry interval
+			3, 0, 4, 116, 101, 115, 116, // content type
+			8, 0, 5, 116, 111, 112, 105, 99, // response topic
+			9, 0, 4, 1, 2, 3,
+			4, // corelation data
+			24, 0, 0, 4, 210, // will delay interval
+			38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // user properties
+			0,
+			5, // Will topic length
+			116, 111, 112, 105, 99, // Will topic
+			0, 4, // Will payload length
+			4, 3, 2, 1, // Will payload
+		];
+
+		var bb1 = new BytesBuffer();
+		for (i in p2)
+			bb1.addByte(i);
+
+		var o = new haxe.io.BytesOutput();
+		var w = new Writer(o);
+		w.write(p);
+		Assert.same(bb1.getBytes(), o.getBytes());
 	}
 
 	/*connect MQTT 5 with will properties but with empty will payload*/
